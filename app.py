@@ -3,6 +3,7 @@ from openai import OpenAI
 import google.generativeai as genai
 from flask import Flask, render_template, jsonify, request
 import os
+import marko
 
 def getResponse(type, question):
     if type == "openai":
@@ -121,7 +122,7 @@ def ask_question():
     
     print(tool)
     print(best_response)
-    result = {'message': best_response, 'tool': tool}
+    result = {'message': (best_response), 'tool': tool}
     return jsonify(result)
 
 
