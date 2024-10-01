@@ -122,7 +122,7 @@ def ask_question():
     
     print(tool)
     print(best_response)
-    result = {'message': (best_response), 'tool': tool}
+    result = {'message': marko.convert(best_response), 'tool': tool}
     return jsonify(result)
 
 
