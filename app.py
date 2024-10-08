@@ -34,7 +34,7 @@ def getResponse(type, question):
             model="claude-3-5-sonnet-20240620",
             max_tokens=1000,
             temperature=0,
-            system="Please respond with the best answer.",
+            system="",
             messages=[
                 {
                     "role": "user",
@@ -62,7 +62,7 @@ def home():
 @app.route('/ask_question', methods=['POST'])
 def ask_question():
     data = request.get_json()
-    question = data['question']
+    question = "Please respond with the best answer to the following question:" + data['question']
     
     openai_response = getResponse("openai", question)
     gemini_response = getResponse("gemini", question)
@@ -73,11 +73,18 @@ def ask_question():
     tool = 1
 
     #while vote1 != "1" and vote1 != "2" and vote1 != "3":
-    vote1 = getResponse("openai", "Here was the question that was given: " + question + "Given the following three responses, return only the number of the best response." + "1. " + openai_response + " 2. " + gemini_response + " 3. " + claude_response + " Remember, only return the number '1', '2', or '3' as a standalone number.")
+    response1 = getResponse("openai", "Here was the question that was given: " + question + "Given the following three responses, use the best and most accurate information from each to write a new consolidated response to the queston: " + "1. " + openai_response + " 2. " + gemini_response + " 3. " + claude_response + " Remember, only return the number '1', '2', or '3' as a standalone number.")
     #while vote2 != "1" and vote2 != "2" and vote2 != "3":
-    vote2 = getResponse("gemini", "Here was the question that was given: " + question + "Given the following three responses, return only the number of the best response." + "1. " + openai_response + " 2. " + gemini_response + " 3. " + claude_response + " Remember, only return the number '1', '2', or '3' as a standalone number.")
+    response2 = getResponse("gemini", "Here was the question that was given: " + question + "Given the following three responses, use the best and most accurate information from each to write a new consolidated response to the queston: " + "1. " + openai_response + " 2. " + gemini_response + " 3. " + claude_response + " Remember, only return the number '1', '2', or '3' as a standalone number.")
     #while vote3 != "1" and vote3 != "2" and vote3 != "3":
-    vote3 = getResponse("claude", "Here was the question that was given: " + question + "Given the following three responses, return only the number of the best response." + "1. " + openai_response + " 2. " + gemini_response + " 3. " + claude_response + " Remember, only return the number '1', '2', or '3' as a standalone number.")
+    response3 = getResponse("claude", "Here was the question that was given: " + question + "Given the following three responses, use the best and most accurate information from each to write a new consolidated response to the queston: " + "1. " + openai_response + " 2. " + gemini_response + " 3. " + claude_response + " Remember, only return the number '1', '2', or '3' as a standalone number.")
+    
+    #while vote1 != "1" and vote1 != "2" and vote1 != "3":
+    vote1 = getResponse("openai", "Here was the question that was given: " + question + "Given the following three responses, return only the number of the best response." + "1. " + response1 + " 2. " + response2 + " 3. " + response3 + " Remember, only return the number '1', '2', or '3' as a standalone number.")
+    #while vote2 != "1" and vote2 != "2" and vote2 != "3":
+    vote2 = getResponse("gemini", "Here was the question that was given: " + question + "Given the following three responses, return only the number of the best response." + "1. " + response1 + " 2. " + response2 + " 3. " + response3 + " Remember, only return the number '1', '2', or '3' as a standalone number.")
+    #while vote3 != "1" and vote3 != "2" and vote3 != "3":
+    vote3 = getResponse("claude", "Here was the question that was given: " + question + "Given the following three responses, return only the number of the best response." + "1. " + response1 + " 2. " + response2 + " 3. " + response3 + " Remember, only return the number '1', '2', or '3' as a standalone number.")
     
     vote1 = int(vote1)
     vote2 = int(vote2)
@@ -120,8 +127,6 @@ def ask_question():
     else:
         best_response = claude_response
     
-    print(tool)
-    print(best_response)
     result = {'message': marko.convert(best_response), 'tool': tool}
     return jsonify(result)
 

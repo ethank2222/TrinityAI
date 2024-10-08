@@ -54,7 +54,7 @@
                 </div>
                 <center><h3 style="margin: 0px 0px 15px;"><i>Merging the most powerful AI tools on the market into a single chat solution.</i></h3></center>
                 <div style="max-height: 300px;">
-                    <p style="margin: 0px;">Use the capabilities of ChatGPT, Google, and Anthropic AI in a single tool. TrinityAI is a tool that uses the APIs of Gemini, OpenAI, and Claude. When you ask Trinity a question, the question is asked of the three chat AI tools. Trinity then uses each AI to determine the best of the three given answer choices, and outputs that most accurate response.</p>
+                    <p style="margin: 0px;">Use the capabilities of ChatGPT, Google Gemini, and Anthropic AI (Claude) in a single tool. When the user asks Trinity a question, that question is asked of each of the three LLMs. The responses are then peer reviewed, and each of the three AI tools create new responses based on the most accurate information given by all of the original responses. Finally, Trinity finds the most accurate of these final-draft, compiled responses, and serves it to the user.</p>
                 </div>
                 <div id="close-popup" style="transition: .2s; height: 33px; width: 33px; position: absolute; color: black; top: 15px; right: 25px; cursor:pointer; font-size: 2rem; text-align: center;">✖</div>
             </div>
@@ -180,7 +180,7 @@
                         color: inherit;
                         text-decoration: underline;
                         font-style: italic;
-                    ">Response from ` + toolNames[tool-1] + `</a>
+                    ">Largest Contributor: ` + toolNames[tool-1] + `</a>
                 ` + text;
                 elem.style.alignSelf = "left";
                 elem.classList += "trinityResponse"
