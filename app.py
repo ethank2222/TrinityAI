@@ -63,7 +63,8 @@ def home():
 def ask_question():
     data = request.get_json()
     question = "Please respond with the best answer to the following question:" + data['question']
-    
+
+    #Step 1: Get Initial Responses 
     openai_response = getResponse("openai", question)
     gemini_response = getResponse("gemini", question)
     claude_response = getResponse("claude", question)
@@ -72,12 +73,16 @@ def ask_question():
     vote3 = 0
     tool = 1
 
+    #Step 2: Refining Answers
+
     #while vote1 != "1" and vote1 != "2" and vote1 != "3":
     response1 = getResponse("openai", "Here was the question that was given: " + question + "Given the following three responses, use the best and most accurate information from each to write a new consolidated response to the queston: " + "1. " + openai_response + " 2. " + gemini_response + " 3. " + claude_response + " Remember, only return the number '1', '2', or '3' as a standalone number.")
     #while vote2 != "1" and vote2 != "2" and vote2 != "3":
     response2 = getResponse("gemini", "Here was the question that was given: " + question + "Given the following three responses, use the best and most accurate information from each to write a new consolidated response to the queston: " + "1. " + openai_response + " 2. " + gemini_response + " 3. " + claude_response + " Remember, only return the number '1', '2', or '3' as a standalone number.")
     #while vote3 != "1" and vote3 != "2" and vote3 != "3":
     response3 = getResponse("claude", "Here was the question that was given: " + question + "Given the following three responses, use the best and most accurate information from each to write a new consolidated response to the queston: " + "1. " + openai_response + " 2. " + gemini_response + " 3. " + claude_response + " Remember, only return the number '1', '2', or '3' as a standalone number.")
+    
+    #Step 3: Choosing the Most Accurate Response
     
     #while vote1 != "1" and vote1 != "2" and vote1 != "3":
     vote1 = getResponse("openai", "Here was the question that was given: " + question + "Given the following three responses, return only the number of the best response." + "1. " + response1 + " 2. " + response2 + " 3. " + response3 + " Remember, only return the number '1', '2', or '3' as a standalone number.")
