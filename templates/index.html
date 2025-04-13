@@ -156,7 +156,7 @@
                         contentType: 'application/json',
                         type: 'POST',
                         data: JSON.stringify({
-                            "question": "Here was the question that was given: " + question + "Given the following three responses, use the best and most accurate information from each to write a new consolidated response to the queston: " + "1. " + openai_response + " 2. " + gemini_response + " 3. " + claude_response
+                            "question": "Here was the question that was given: " + question + "Given the following three responses, use the best and most accurate information from each to write a new consolidated response to the queston: " + "1. " + openai_response + " 2. " + gemini_response + " 3. " + claude_response + ". Do not give any qualifiers like 'here's a consolidated response based on the given information."
                         }),
                         success: function(data) {
                             done = 4;
@@ -176,7 +176,7 @@
                         contentType: 'application/json',
                         type: 'POST',
                         data: JSON.stringify({
-                            "question": "Here was the question that was given: " + question + "Given the following three responses, use the best and most accurate information from each to write a new consolidated response to the queston: " + "1. " + openai_response + " 2. " + gemini_response + " 3. " + claude_response
+                            "question": "Here was the question that was given: " + question + "Given the following three responses, use the best and most accurate information from each to write a new consolidated response to the queston: " + "1. " + openai_response + " 2. " + gemini_response + " 3. " + claude_response + ". Do not give any qualifiers like 'here's a consolidated response based on the given information."
                         }),
                         success: function(data) {
                             done = 5;
@@ -196,7 +196,7 @@
                         contentType: 'application/json',
                         type: 'POST',
                         data: JSON.stringify({
-                            "question": "Here was the question that was given: " + question + "Given the following three responses, use the best and most accurate information from each to write a new consolidated response to the queston: " + "1. " + openai_response + " 2. " + gemini_response + " 3. " + claude_response
+                            "question": "Here was the question that was given: " + question + "Given the following three responses, use the best and most accurate information from each to write a new consolidated response to the queston: " + "1. " + openai_response + " 2. " + gemini_response + " 3. " + claude_response + ". Do not give any qualifiers like 'here's a consolidated response based on the given information."
                         }),
                         success: function(data) {
                             done = 6;
@@ -349,7 +349,7 @@
                 var x = document.getElementsByClassName("loader");
                 for (var i = 0; i < x.length; i++){
                     x[i].children[1].value = completedTasks;
-                    x[i].children[2].firstChild.innerText = taskDescriptions[completedTasks-1];
+                    x[i].children[2].innerText = taskDescriptions[completedTasks-1];
                 }
             }
 
@@ -377,12 +377,13 @@
                 loader.style.left = "50%";
                 loader.style.transform = "translate(-50%, -50%)";
                 loader.style.padding = "25px 50px";
-                loader.style.backgroundColor = "rgba(230, 230, 230, 0.8)";
+                loader.style.backgroundColor = "rgba(230, 230, 230, 0.9)";
                 loader.style.borderRadius = "5px";
+                loader.style.textAlign="center";
                 loader.innerHTML = `
-                    <center><h2 style="margin: 0px 0px 5px">Loading Response</h2></center>
-                    <progress id="progress-bar" style="transition: .1s; height: 25px; width: 300px; color: #69c8ff" max="10" value="00"></progress>
-                    <center><p id="progress-text">Getting Initial Response from ChatGPT</p></center>
+                    <h2 style="margin: 0px 0px 5px">Loading Response</h2>
+                    <progress id="progress-bar" style="transition: .1s; height: 25px; width: 400px; color: #69c8ff" max="10" value="00"></progress>
+                    <p id="progress-text">Getting Initial Response from ChatGPT</p>
                 `
                 document.body.appendChild(loader);
                 elem.style.alignSelf = "right";
@@ -433,9 +434,10 @@
 
     </script>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Ubuntu+Mono:ital,wght@0,400;0,700;1,400;1,700&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,300..800;1,300..800');
         *{
-            font-family: "Ubuntu Mono", monospace;
+            font-family: "Open Sans", sans-serif;
+            font-optical-sizing: auto;
         }
         body{
             margin: 0px;
@@ -488,7 +490,7 @@
             background-color: #dcdcdc;
             border-radius: 20px;
             position: absolute;
-            bottom: 20px;
+            bottom: 10px;
             display: flex;
         }
         textarea:focus, input:focus{
