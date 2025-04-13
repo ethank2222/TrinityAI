@@ -168,8 +168,6 @@
                         }
                     });
                 });
-
-
                 response2 = await new Promise((resolve, reject) => {
                     $.ajax({
                         url: '/geminiModifyingResponse',
@@ -188,8 +186,6 @@
                         }
                     });
                 });
-
-
                 response3 = await new Promise((resolve, reject) => {
                     $.ajax({
                         url: '/claudeModifyingResponse',
@@ -227,8 +223,6 @@
                         }
                     });
                 });
-
-
                 vote2 = await new Promise((resolve, reject) => {
                     $.ajax({
                         url: '/geminiVoting',
@@ -247,8 +241,6 @@
                         }
                     });
                 });
-
-
                 vote3 = await new Promise((resolve, reject) => {
                     $.ajax({
                         url: '/claudeVoting',
@@ -267,9 +259,6 @@
                         }
                     });
                 });
-
-
-
                 //Computing and return message
                 var votesfor1 = 0;
                 var votesfor2 = 0;
