@@ -57,79 +57,77 @@ app = Flask(__name__)
 def home():
     return render_template('index.html')
 
-
-
-@app.route('/ask_question', methods=['POST'])
-def ask_question():
+#openai first response
+@app.route('/openaiFirstResponse', methods=['POST'])
+def openaiFirstResponse():
     data = request.get_json()
     question = "Please respond with the best answer to the following question:" + data['question']
-    
-    openai_response = getResponse("openai", question)
-    gemini_response = getResponse("gemini", question)
-    claude_response = getResponse("claude", question)
-    vote1 = 0
-    vote2 = 0
-    vote3 = 0
-    tool = 1
+    response = getResponse("openai", question)
+    return jsonify({"message": response})
+#gemini first response
+@app.route('/geminiFirstResponse', methods=['POST'])
+def geminiFirstResponse():
+    data = request.get_json()
+    question = "Please respond with the best answer to the following question:" + data['question']
+    response = getResponse("gemini", question)
+    return jsonify({"message": response})
+#claude first response
+@app.route('/claudeFirstResponse', methods=['POST'])
+def claudeFirstResponse():
+    data = request.get_json()
+    question = "Please respond with the best answer to the following question:" + data['question']
+    response = getResponse("claude", question)
+    return jsonify({"message": response})
 
-    #while vote1 != "1" and vote1 != "2" and vote1 != "3":
-    response1 = getResponse("openai", "Here was the question that was given: " + question + "Given the following three responses, use the best and most accurate information from each to write a new consolidated response to the queston: " + "1. " + openai_response + " 2. " + gemini_response + " 3. " + claude_response + " Remember, only return the number '1', '2', or '3' as a standalone number.")
-    #while vote2 != "1" and vote2 != "2" and vote2 != "3":
-    response2 = getResponse("gemini", "Here was the question that was given: " + question + "Given the following three responses, use the best and most accurate information from each to write a new consolidated response to the queston: " + "1. " + openai_response + " 2. " + gemini_response + " 3. " + claude_response + " Remember, only return the number '1', '2', or '3' as a standalone number.")
-    #while vote3 != "1" and vote3 != "2" and vote3 != "3":
-    response3 = getResponse("claude", "Here was the question that was given: " + question + "Given the following three responses, use the best and most accurate information from each to write a new consolidated response to the queston: " + "1. " + openai_response + " 2. " + gemini_response + " 3. " + claude_response + " Remember, only return the number '1', '2', or '3' as a standalone number.")
-    
-    #while vote1 != "1" and vote1 != "2" and vote1 != "3":
-    vote1 = getResponse("openai", "Here was the question that was given: " + question + "Given the following three responses, return only the number of the best response." + "1. " + response1 + " 2. " + response2 + " 3. " + response3 + " Remember, only return the number '1', '2', or '3' as a standalone number.")
-    #while vote2 != "1" and vote2 != "2" and vote2 != "3":
-    vote2 = getResponse("gemini", "Here was the question that was given: " + question + "Given the following three responses, return only the number of the best response." + "1. " + response1 + " 2. " + response2 + " 3. " + response3 + " Remember, only return the number '1', '2', or '3' as a standalone number.")
-    #while vote3 != "1" and vote3 != "2" and vote3 != "3":
-    vote3 = getResponse("claude", "Here was the question that was given: " + question + "Given the following three responses, return only the number of the best response." + "1. " + response1 + " 2. " + response2 + " 3. " + response3 + " Remember, only return the number '1', '2', or '3' as a standalone number.")
-    
-    vote1 = int(vote1)
-    vote2 = int(vote2)
-    vote3 = int(vote3)
+#openai modifying response
+@app.route('/openaiModifyingResponse', methods=['POST'])
+def openaiModifyingResponse():
+    question = request.get_json()['question']
+    response = getResponse("openai", question)
+    return jsonify({"message": response})
+#gemini modifying response
+@app.route('/geminiModifyingResponse', methods=['POST'])
+def geminiModifyingResponse():
+    question = request.get_json()['question']
+    response = getResponse("gemini", question)
+    return jsonify({"message": response})
+#claude modifying response
+@app.route('/claudeModifyingResponse', methods=['POST'])
+def claudeModifyingResponse():
+    question = request.get_json()['question']
+    response = getResponse("claude", question)
+    return jsonify({"message": response})
 
-    votesfor1 = 0
-    votesfor2 = 0
-    votesfor3 = 0
-
-    if vote1 == 1:
-        votesfor1 += 1
-    elif vote1 == 2:
-        votesfor2 += 1
-    elif vote1 == 3:
-        votesfor3 += 1
-    if vote2 == 1:
-        votesfor1 += 1
-    elif vote2 == 2:
-        votesfor2 += 1
-    elif vote2 == 3:
-        votesfor3 += 1
-    if vote3 == 1:
-        votesfor1 += 1
-    elif vote3 == 2:
-        votesfor2 += 1
-    elif vote3 == 3:
-        votesfor3 += 1
-    
-    if votesfor1 > votesfor2 and votesfor1 > votesfor3:
-        tool = 1
-    if votesfor2 > votesfor1 and votesfor2 > votesfor3:
-        tool = 2
-    if votesfor3 > votesfor1 and votesfor3 > votesfor2:
-        tool = 3
-    
-    if tool == 1:
-        best_response = openai_response
-    elif tool == 2:
-        best_response = gemini_response
-    else:
-        best_response = claude_response
-    
-    result = {'message': marko.convert(best_response), 'tool': tool}
-    return jsonify(result)
-
+#openai voting
+@app.route('/openaiVoting', methods=['POST'])
+def openaiVoting():
+    question = request.get_json()['question']
+    response = getResponse("openai", question)
+    if "1" in response:
+        return jsonify({"message": 1})
+    if "2" in response:
+        return jsonify({"message": 2})
+    return jsonify({"message": 3})
+#gemini voting
+@app.route('/geminiVoting', methods=['POST'])
+def geminiVoting():
+    question = request.get_json()['question']
+    response = getResponse("gemini", question)
+    if "1" in response:
+        return jsonify({"message": 1})
+    if "2" in response:
+        return jsonify({"message": 2})
+    return jsonify({"message": 3})
+#claude voting response
+@app.route('/claudeVoting', methods=['POST'])
+def claudeVoting():
+    question = request.get_json()['question']
+    response = getResponse("claude", question)
+    if "1" in response:
+        return jsonify({"message": 1})
+    if "2" in response:
+        return jsonify({"message": 2})
+    return jsonify({"message": 3})
 
 if __name__ == '__main__':
    app.run()

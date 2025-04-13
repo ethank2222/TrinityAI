@@ -21,6 +21,7 @@
         </div>
     </body>
     <script>
+        let computing = 0;
         giveInfo();
         document.getElementById("menu").onclick = function(){giveInfo()};
         function giveInfo(){
@@ -81,34 +82,278 @@
             send();
         }
         });
-
-        function send(){
-            if (document.getElementById("text").value != ""){
+        
+        async function send(){
+            if (computing == 0 && document.getElementById("text").value != ""){
+                computing = 1;
                 var question = document.getElementById("text").value;
                 chain.push(question);
                 nummessages++;
                 printMessage("user", question, 4);
                 document.getElementById("text").value = "";
-                $.ajax({
-                    url: '/ask_question',
-                    contentType: 'application/json',
-                    type: 'POST',
-                    data: JSON.stringify({
-                        "level": 5,
-                        "question": question
-                    }),
-                    success: function(data) {
-                        nummessages++;
-                        chain.push(data.message);
-                        printMessage("computer", data.message, data.tool);
-                        var x = document.getElementsByClassName("loader");
-                        for (var i = 0; i < x.length; i++){
-                            x[i].remove();
+                let openai_response, gemini_response, claude_response, response2, response3, vote1, vote2, vote3;
+                var done = 0;
+
+                //Get first Responses
+                openai_response = await new Promise((resolve, reject) => {
+                    $.ajax({
+                        url: '/openaiFirstResponse',
+                        contentType: 'application/json',
+                        type: 'POST',
+                        data: JSON.stringify({
+                            "question": question
+                        }),
+                        success: function(data) {
+                            done = 1;
+                            updateLoading(done);
+                            resolve(data.message);
+                        },
+                        error: function(err) {
+                            reject(err);
                         }
-                    }
+                    });
                 });
+                gemini_response = await new Promise((resolve, reject) => {
+                    $.ajax({
+                        url: '/geminiFirstResponse',
+                        contentType: 'application/json',
+                        type: 'POST',
+                        data: JSON.stringify({
+                            "question": question
+                        }),
+                        success: function(data) {
+                            done = 2;
+                            updateLoading(done);
+                            resolve(data.message);
+                        },
+                        error: function(err) {
+                            reject(err);
+                        }
+                    });
+                });
+                claude_response = await new Promise((resolve, reject) => {
+                    $.ajax({
+                        url: '/claudeFirstResponse',
+                        contentType: 'application/json',
+                        type: 'POST',
+                        data: JSON.stringify({
+                            "question": question
+                        }),
+                        success: function(data) {
+                            done = 3;
+                            updateLoading(done);
+                            resolve(data.message);
+                        },
+                        error: function(err) {
+                            reject(err);
+                        }
+                    });
+                });
+                //Modify Responses
+                response1 = await new Promise((resolve, reject) => {
+                    $.ajax({
+                        url: '/openaiModifyingResponse',
+                        contentType: 'application/json',
+                        type: 'POST',
+                        data: JSON.stringify({
+                            "question": "Here was the question that was given: " + question + "Given the following three responses, use the best and most accurate information from each to write a new consolidated response to the queston: " + "1. " + openai_response + " 2. " + gemini_response + " 3. " + claude_response
+                        }),
+                        success: function(data) {
+                            done = 4;
+                            updateLoading(done);
+                            resolve(data.message);
+                        },
+                        error: function(err) {
+                            reject(err);
+                        }
+                    });
+                });
+
+
+                response2 = await new Promise((resolve, reject) => {
+                    $.ajax({
+                        url: '/geminiModifyingResponse',
+                        contentType: 'application/json',
+                        type: 'POST',
+                        data: JSON.stringify({
+                            "question": "Here was the question that was given: " + question + "Given the following three responses, use the best and most accurate information from each to write a new consolidated response to the queston: " + "1. " + openai_response + " 2. " + gemini_response + " 3. " + claude_response
+                        }),
+                        success: function(data) {
+                            done = 5;
+                            updateLoading(done);
+                            resolve(data.message);
+                        },
+                        error: function(err) {
+                            reject(err);
+                        }
+                    });
+                });
+
+
+                response3 = await new Promise((resolve, reject) => {
+                    $.ajax({
+                        url: '/claudeModifyingResponse',
+                        contentType: 'application/json',
+                        type: 'POST',
+                        data: JSON.stringify({
+                            "question": "Here was the question that was given: " + question + "Given the following three responses, use the best and most accurate information from each to write a new consolidated response to the queston: " + "1. " + openai_response + " 2. " + gemini_response + " 3. " + claude_response
+                        }),
+                        success: function(data) {
+                            done = 6;
+                            updateLoading(done);
+                            resolve(data.message);
+                        },
+                        error: function(err) {
+                            reject(err);
+                        }
+                    });
+                });
+                //Voting
+                vote1 = await new Promise((resolve, reject) => {
+                    $.ajax({
+                        url: '/openaiVoting',
+                        contentType: 'application/json',
+                        type: 'POST',
+                        data: JSON.stringify({
+                            "question": "Here was the question that was given: " + question + "Given the following three responses, return only the number of the best response." + "1. " + response1 + " 2. " + response2 + " 3. " + response3 + " Remember, only return the number '1', '2', or '3' as a standalone number."
+                        }),
+                        success: function(data) {
+                            done = 7;
+                            updateLoading(done);
+                            resolve(data.message);
+                        },
+                        error: function(err) {
+                            reject(err);
+                        }
+                    });
+                });
+
+
+                vote2 = await new Promise((resolve, reject) => {
+                    $.ajax({
+                        url: '/geminiVoting',
+                        contentType: 'application/json',
+                        type: 'POST',
+                        data: JSON.stringify({
+                            "question": "Here was the question that was given: " + question + "Given the following three responses, return only the number of the best response." + "1. " + response1 + " 2. " + response2 + " 3. " + response3 + " Remember, only return the number '1', '2', or '3' as a standalone number."
+                        }),
+                        success: function(data) {
+                            done = 8;
+                            updateLoading(done);
+                            resolve(data.message);
+                        },
+                        error: function(err) {
+                            reject(err);
+                        }
+                    });
+                });
+
+
+                vote3 = await new Promise((resolve, reject) => {
+                    $.ajax({
+                        url: '/claudeVoting',
+                        contentType: 'application/json',
+                        type: 'POST',
+                        data: JSON.stringify({
+                            "question": "Here was the question that was given: " + question + "Given the following three responses, return only the number of the best response." + "1. " + response1 + " 2. " + response2 + " 3. " + response3 + " Remember, only return the number '1', '2', or '3' as a standalone number."
+                        }),
+                        success: function(data) {
+                            done = 9;
+                            updateLoading(done);
+                            resolve(data.message);
+                        },
+                        error: function(err) {
+                            reject(err);
+                        }
+                    });
+                });
+
+
+
+                //Computing and return message
+                var votesfor1 = 0;
+                var votesfor2 = 0;
+                var votesfor3 = 0;
+
+                if (vote1 == 1){
+                    votesfor1 += 1
+                }
+                else if (vote1 == 2){
+                    votesfor2 += 1
+                }
+                else if (vote1 == 3){
+                    votesfor3 += 1
+                }
+                if (vote2 == 1){
+                    votesfor1 += 1
+                }
+                else if (vote2 == 2){
+                    votesfor2 += 1
+                }
+                else if (vote2 == 3){
+                    votesfor3 += 1
+                }
+                if (vote3 == 1){
+                    votesfor1 += 1
+                }
+                else if (vote3 == 2){
+                    votesfor2 += 1
+                }
+                else if (vote3 == 3){
+                    votesfor3 += 1
+                }
+                var best_response = response3;
+                let toolIndex = 3;
+
+                if (votesfor1 > votesfor2 && votesfor1 > votesfor3){
+                    best_response = response1;
+                    toolIndex = 1;
+                }
+                if (votesfor2 > votesfor1 && votesfor2 > votesfor3){
+                    best_response = response2;
+                    toolIndex = 2;
+                }
+                tempGlobal = best_response;
+                console.log(tempGlobal);
+
+                done = 10;
+                updateLoading(done);
+
+                nummessages++;
+                chain.push(best_response);
+                printMessage("computer", best_response, toolIndex);
+                
+                computing = 0;
             }
         };
+        function updateLoading(completedTasks){
+            var taskDescriptions = [
+                "Getting Initial Response from Gemini",
+                "Getting Initial Response from Claude",
+                "Revising Response from ChatGPT",
+                "Revising Response from Gemini",
+                "Revising Response from Claude",
+                "Collecting Vote from ChatGPT",
+                "Collecting Vote from Gemini",
+                "Collecting Vote from Claude",
+                "Tallying Votes"
+            ]
+            console.log(completedTasks);
+            if (completedTasks == 10){
+                var x = document.getElementsByClassName("loader");
+                for (var i = 0; i < x.length; i++){
+                    x[i].remove();
+                }
+            }
+            else{
+                var x = document.getElementsByClassName("loader");
+                for (var i = 0; i < x.length; i++){
+                    x[i].children[1].value = completedTasks;
+                    x[i].children[2].firstChild.innerText = taskDescriptions[completedTasks-1];
+                }
+            }
+
+        }
         function printMessage(type, text, tool){
             var elemwrap = document.createElement("div");
             elemwrap.style.width = "100%";
@@ -128,35 +373,16 @@
                 var loader = document.createElement("div");
                 loader.style.position = "fixed";
                 loader.style.top = "50%";
+                loader.className = "loader";
                 loader.style.left = "50%";
                 loader.style.transform = "translate(-50%, -50%)";
+                loader.style.padding = "25px 50px";
+                loader.style.backgroundColor = "rgba(230, 230, 230, 0.8)";
+                loader.style.borderRadius = "5px";
                 loader.innerHTML = `
-                <style>
-                    .loader {
-                        border: 12px solid #f3f3f3;
-                        border-radius: 50%;
-                        border-top: 12px solid #69c8ff;
-                        width: 50px;
-                        height: 50px;
-                        -webkit-animation: spin 1.5s ease-in-out infinite; /* Safari */
-                        animation: spin 1.5s ease-in-out infinite;
-                    }
-
-                    /* Safari */
-                    @-webkit-keyframes spin {
-                    0% { -webkit-transform: rotate(0deg); }
-                    100% { -webkit-transform: rotate(360deg); }
-                    }
-
-                    @keyframes spin {
-                    0% { transform: rotate(0deg); }
-                    100% { transform: rotate(360deg); }
-                    }
-
-                    </style>
-                    <div class="loader"></div>
-
-                
+                    <center><h2 style="margin: 0px 0px 5px">Loading Response</h2></center>
+                    <progress id="progress-bar" style="transition: .1s; height: 25px; width: 300px; color: #69c8ff" max="10" value="00"></progress>
+                    <center><p id="progress-text">Getting Initial Response from ChatGPT</p></center>
                 `
                 document.body.appendChild(loader);
                 elem.style.alignSelf = "right";
@@ -164,7 +390,7 @@
                 elem.innerText = text;
             }
             else{
-                toolNames = ["OpenAI", "Gemini", "Claude AI"]
+                toolNames = ["ChatGPT (Open AI)", "Gemini (Google AI)", "Claude (Anthropic AI)"]
                 toolLinks = ["https://openai.com/chatgpt/", "https://gemini.google.com/", "https://claude.ai/"]
                 elemwrap.innerHTML = `<img src="/static/images/logo.png" style="
                     height: 26px;
