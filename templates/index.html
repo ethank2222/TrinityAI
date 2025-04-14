@@ -12,6 +12,10 @@
             <i class="fa fa-ellipsis-v" id="menu" style="font-size: 38px; height: 38px; position: relative; margin: auto 0px; right: 0px; justify-self: flex-end; cursor:pointer;"></i>
         </div>
         <div class="wrapper">
+            <div id="welcome" style="width: 100%; position:fixed; left: 50%; right: 50%; transform: translate(-50%,-50%);">
+                <h2 style="font-size: 34px; margin: 0px;">Hi! I'm Trinity</h2>
+                <h3 style="color:#666; margin: 10px 0px 0px 0px; font-size: 25px;">How can I help you today?</h3>
+            </div>
             <div id="messages">
             </div>
             <div id="textbox">
@@ -85,6 +89,9 @@
         
         async function send(){
             if (computing == 0 && document.getElementById("text").value != ""){
+                if (document.getElementById("welcome")!= undefined){
+                    document.getElementById("welcome").remove();
+                }
                 computing = 1;
                 var question = document.getElementById("text").value;
                 chain.push(question);
@@ -317,14 +324,15 @@
         };
         function updateLoading(completedTasks){
             var taskDescriptions = [
-                "Getting Initial Response from Gemini",
-                "Getting Initial Response from Claude",
-                "Revising Response from ChatGPT",
-                "Revising Response from Gemini",
-                "Revising Response from Claude",
-                "Collecting Vote from ChatGPT",
-                "Collecting Vote from Gemini",
-                "Collecting Vote from Claude",
+                "Getting Initial Response from <b style='color:#69c8ff;'>ChatGPT</b>",
+                "Getting Initial Response from <b style='color:#db4d4c;'>Gemini</b>",
+                "Getting Initial Response from <b style='color:#eea638;'>Claude</b>",
+                "Peer editing the response from <b style='color:#69c8ff;'>ChatGPT</b>",
+                "Peer editing the response from <b style='color:#db4d4c;'>Gemini</b>",
+                "Peer editing the response from <b style='color:#eea638;'>Claude</b>",
+                "Collecting Vote from <b style='color:#69c8ff;'>ChatGPT</b>",
+                "Collecting Vote from <b style='color:#db4d4c;'>Gemini</b>",
+                "Collecting Vote from <b style='color:#eea638;'>Claude</b>",
                 "Tallying Votes"
             ]
             console.log(completedTasks);
@@ -338,7 +346,7 @@
                 var x = document.getElementsByClassName("loader");
                 for (var i = 0; i < x.length; i++){
                     x[i].children[1].value = completedTasks;
-                    x[i].children[2].innerText = taskDescriptions[completedTasks-1];
+                    x[i].children[2].innerHTML = taskDescriptions[completedTasks];
                 }
             }
 
@@ -378,6 +386,7 @@
                 elem.style.alignSelf = "right";
                 elemwrap.style.justifyContent = "right";
                 elem.innerText = text;
+                updateLoading(0);
             }
             else{
                 toolNames = ["ChatGPT (Open AI)", "Gemini (Google AI)", "Claude (Anthropic AI)"]
