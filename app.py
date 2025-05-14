@@ -8,9 +8,12 @@ from pymongo import MongoClient
 from dotenv import load_dotenv
 from datetime import datetime
 from bson import ObjectId
+import datetime
 
 
 load_dotenv()
+
+
 mongo_client = MongoClient(os.environ.get('MONGODB_URI'))
 try:
     mongo_client.server_info()  # This will raise an error if the connection fails
@@ -151,20 +154,45 @@ def postDatapoint():
     try:
         answer = request.get_json()['answer']
         tool = request.get_json()['tool']
-        rating = request.get_json()['rating']
+        rating = int(request.get_json()['rating'])
 
         datapoint = {
             "answer": answer,
             "tool": tool,
-            "rating": rating
+            "rating": rating,
         }
         
         result = interactions_collection.insert_one(datapoint)
-        return jsonify({"message": "Thank you for your input!"})
 
+        datapoints = list(interactions_collection.find())
+        for each in datapoints:
+            each['_id'] = str(each['_id'])  # Convert ObjectId to string
+            print(each)
+
+        return jsonify({"message": "Thank you for your input!"})
     except Exception as e:
         # Handle any errors and return an error response
         return jsonify({"message": "Unable to process the request at this time."})
+
+def getWeights():
+    datapoints = list(interactions_collection.find())
+    for each in datapoints:
+        each['_id'] = str(each['_id'])  # Convert ObjectId to string
+        print(each)
+    openai = 0
+    claude = 0
+    gemini = 0
+
+    #implement ML Algo Here
+
+
+
+
+
+    return [openai, gemini, claude]
+
+
+
 
 if __name__ == '__main__':
    app.run()
