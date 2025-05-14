@@ -21,7 +21,7 @@ try:
 except Exception as e:
     print(f"MongoDB connection error: {e}")
 
-db_name = 'trinityai_dev' if os.environ.get('FLASK_ENV') == 'development' else 'trinityai_prod'
+db_name = 'trinityai_dev'
 db = mongo_client.get_database(db_name)
 interactions_collection = db.interactions
 
@@ -179,10 +179,12 @@ def getWeights():
     for each in datapoints:
         each['_id'] = str(each['_id'])  # Convert ObjectId to string
         print(each)
-    openai = 0
-    claude = 0
-    gemini = 0
-
+    openai = 1
+    claude = 1
+    gemini = 1
+    if len(datapoints) <= 50:
+        return [openai, gemini, claude]
+    
     #implement ML Algo Here
 
 
