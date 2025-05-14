@@ -18,7 +18,7 @@ try:
 except Exception as e:
     print(f"MongoDB connection error: {e}")
 
-db_name = 'trinityai_dev' if os.environ.get(os.environ.get('FLASK_ENV')) == 'development' else 'trinityai_prod'
+db_name = 'trinityai_dev' if os.environ.get('FLASK_ENV') == 'development' else 'trinityai_prod'
 db = mongo_client.get_database(db_name)
 interactions_collection = db.interactions
 
@@ -148,24 +148,22 @@ def claudeVoting():
 
 @app.route('/postDatapoint', methods=['POST'])
 def postDatapoint():
+    print(1)
     try:
         answer = request.get_json()['answer']
         tool = request.get_json()['tool']
         rating = request.get_json()['rating']
-
-        if not all([answer, tool, rating]):
-            return jsonify({"message": "Unable to process the request at this time."})
+        print(2)
 
         datapoint = {
             "answer": answer,
             "tool": tool,
-            "rating": rating,
-            "timestamp": datetime.datetime.now()
+            "rating": rating
         }
+        print(3)
         
-        print(answer)
-
         result = interactions_collection.insert_one(datapoint)
+        print(4)
         return jsonify({"message": "Thank you for your input!"})
 
     except Exception as e:

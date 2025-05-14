@@ -457,7 +457,6 @@
             if(button.parentNode.parentNode.children[0].innerText.includes("claude")){
                 tool = "claude"
             }
-            button.parentNode.innerHTML = "submitting...";
             var resp = await new Promise((resolve, reject) => {
                     $.ajax({
                         url: '/postDatapoint',
