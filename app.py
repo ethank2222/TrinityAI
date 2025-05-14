@@ -148,22 +148,18 @@ def claudeVoting():
 
 @app.route('/postDatapoint', methods=['POST'])
 def postDatapoint():
-    print(1)
     try:
         answer = request.get_json()['answer']
         tool = request.get_json()['tool']
         rating = request.get_json()['rating']
-        print(2)
 
         datapoint = {
             "answer": answer,
             "tool": tool,
             "rating": rating
         }
-        print(3)
         
         result = interactions_collection.insert_one(datapoint)
-        print(4)
         return jsonify({"message": "Thank you for your input!"})
 
     except Exception as e:
