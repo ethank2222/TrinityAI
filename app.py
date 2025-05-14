@@ -4,6 +4,23 @@ import google.generativeai as genai
 from flask import Flask, render_template, jsonify, request
 import os
 import marko
+from pymongo import MongoClient
+from dotenv import load_dotenv
+from datetime import datetime
+from bson import ObjectId
+
+
+load_dotenv()
+mongo_client = MongoClient(os.environ.get('MONGODB_URI'))
+try:
+    mongo_client.server_info()  # This will raise an error if the connection fails
+    print("Connected to MongoDB")
+except Exception as e:
+    print(f"MongoDB connection error: {e}")
+
+db_name = 'trinityai_dev' if os.environ.get(os.environ.get('FLASK_ENV')) == 'development' else 'trinityai_prod'
+db = mongo_client.get_database(db_name)
+interactions_collection = db.interactions
 
 def getResponse(type, question):
     if type == "openai":
@@ -128,6 +145,32 @@ def claudeVoting():
     if "2" in response:
         return jsonify({"message": 2})
     return jsonify({"message": 3})
+
+@app.route('/postDatapoint', methods=['POST'])
+def postDatapoint():
+    try:
+        answer = request.get_json()['answer']
+        tool = request.get_json()['tool']
+        rating = request.get_json()['rating']
+
+        if not all([answer, tool, rating]):
+            return jsonify({"message": "Unable to process the request at this time."})
+
+        datapoint = {
+            "answer": answer,
+            "tool": tool,
+            "rating": rating,
+            "timestamp": datetime.datetime.now()
+        }
+        
+        print(answer)
+
+        result = interactions_collection.insert_one(datapoint)
+        return jsonify({"message": "Thank you for your input!"})
+
+    except Exception as e:
+        # Handle any errors and return an error response
+        return jsonify({"message": "Unable to process the request at this time."})
 
 if __name__ == '__main__':
    app.run()
