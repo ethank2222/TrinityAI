@@ -23,7 +23,7 @@ except Exception as e:
 db_name = 'trinityai_dev'
 db = mongo_client.get_database(db_name)
 interactions_collection = db.interactions
-#interactions_collection.delete_many({})
+interactions_collection.delete_many({})
 
 def getResponse(type, question):
     if type == "openai":
