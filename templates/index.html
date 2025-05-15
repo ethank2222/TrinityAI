@@ -448,8 +448,8 @@
             objDiv.scrollTop = objDiv.scrollHeight;
         }
         async function submitFeedback(button){
-            var answer = button.parentNode.parentNode.parentNode.previousElementSibling.children[0].innerText
-            var rating = button.parentNode.children[1].value
+            var question = button.parentNode.parentNode.parentNode.previousElementSibling.children[0].innerText
+            var score = button.parentNode.children[1].value
             var tool = "openai"
             if(button.parentNode.parentNode.children[0].innerText.includes("gemini")){
                 tool = "gemini"
@@ -463,9 +463,9 @@
                         contentType: 'application/json',
                         type: 'POST',
                         data: JSON.stringify({
-                            "answer": answer,
+                            "question": question,
                             "tool": tool,
-                            "rating": rating
+                            "score": score
                         }),
                         success: function(data) {
                             resolve(data.message);

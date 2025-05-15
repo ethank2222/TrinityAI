@@ -6,14 +6,13 @@ import os
 import marko
 from pymongo import MongoClient
 from dotenv import load_dotenv
-from datetime import datetime
 from bson import ObjectId
-import datetime
+import weights
 
 
 load_dotenv()
 
-
+myWeights = []
 mongo_client = MongoClient(os.environ.get('MONGODB_URI'))
 try:
     mongo_client.server_info()  # This will raise an error if the connection fails
@@ -24,6 +23,7 @@ except Exception as e:
 db_name = 'trinityai_dev'
 db = mongo_client.get_database(db_name)
 interactions_collection = db.interactions
+#interactions_collection.delete_many({})
 
 def getResponse(type, question):
     if type == "openai":
@@ -103,6 +103,8 @@ def claudeFirstResponse():
 @app.route('/openaiModifyingResponse', methods=['POST'])
 def openaiModifyingResponse():
     question = request.get_json()['question']
+    if len(list(interactions_collection.find({"tool": 1}))) > 5 and len(list(interactions_collection.find({"tool": 2}))) > 5 and len(list(interactions_collection.find({"tool": 3}))) > 5:
+        myWeights = getWeights(question)
     response = getResponse("openai", question)
     return jsonify({"message": response})
 #gemini modifying response
@@ -151,47 +153,52 @@ def claudeVoting():
 
 @app.route('/postDatapoint', methods=['POST'])
 def postDatapoint():
+    question = request.get_json()['question']
+    tool = request.get_json()['tool']
+    score = int(request.get_json()['score'])
+    if tool == "openai":
+        tool = 1
+    elif tool == "gemini":
+        tool = 2
+    else:
+        tool = 3
+
+    datapoint = {
+        "question": question,
+        "tool": tool,
+        "score": score,
+    }
+    
+    result = interactions_collection.insert_one(datapoint)
+
+    datapoints = list(interactions_collection.find())
+    for each in datapoints:
+        print(each)
+
+    return jsonify({"message": "Thank you for your input!"})
     try:
-        answer = request.get_json()['answer']
-        tool = request.get_json()['tool']
-        rating = int(request.get_json()['rating'])
-
-        datapoint = {
-            "answer": answer,
-            "tool": tool,
-            "rating": rating,
-        }
-        
-        result = interactions_collection.insert_one(datapoint)
-
-        datapoints = list(interactions_collection.find())
-        for each in datapoints:
-            each['_id'] = str(each['_id'])  # Convert ObjectId to string
-            print(each)
-
-        return jsonify({"message": "Thank you for your input!"})
+        print("hi")
     except Exception as e:
         # Handle any errors and return an error response
         return jsonify({"message": "Unable to process the request at this time."})
 
-def getWeights():
+def getWeights(question):
     datapoints = list(interactions_collection.find())
     for each in datapoints:
         each['_id'] = str(each['_id'])  # Convert ObjectId to string
         print(each)
-    openai = 1
-    claude = 1
-    gemini = 1
-    if len(datapoints) <= 50:
-        return [openai, gemini, claude]
+
+    if len(datapoints) <= 3:
+        print("Not enough Data for Weighting Process")
+        return [.333, .333, .333]
+
     
     #implement ML Algo Here
 
-
-
-
-
-    return [openai, gemini, claude]
+    myWeights = weights.computeWeights(datapoints, question)
+    
+    print(f"Successfully weighted with weights openai: {myWeights[0]}, gemini: {myWeights[1]}, and claude: {myWeights[2]}")
+    return myWeights
 
 
 
