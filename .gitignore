@@ -2,3 +2,5 @@
 .env
 /data
 .venv2
+Dockerfile
+docker-compose.yml
