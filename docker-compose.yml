@@ -1,19 +1,10 @@
 version: '3.8'
 services:
-  app:
-    build: .
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
     ports:
-      - "5000:5000"
-    depends_on:
-      - mongodb
-    networks:
-      - app-network
-  mongodb:
-    image: mongo:latest
-    ports:
-      - "27017:27017"
-    networks:
-      - app-network
-networks:
-  app-network:
-    driver: bridge
+      - "8000:8000"
+    volumes:
+      - .:/app
