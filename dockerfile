@@ -8,4 +8,4 @@ EXPOSE 8000
 
 
 # Use Gunicorn as the production server
-CMD ["python", "app.py"]
+CMD ["gunicorn", "--bind", "0.0.0.0:8000", "app:app"]
