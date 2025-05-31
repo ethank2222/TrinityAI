@@ -76,6 +76,6 @@ jobs:
         uses: azure/webapps-deploy@v3
         id: deploy-to-webapp
         with:
-          app-name: 'Trinity'
+          app-name: 'TrinityAI'
           slot-name: 'Production'
           
