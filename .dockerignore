@@ -6,4 +6,3 @@ __pycache__
 .gitignore
 .venv
 .venv2
-*.env
