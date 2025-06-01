@@ -15,10 +15,10 @@ def home():
 load_dotenv()
 
 myWeights = []
-def get_interactions_collection():
-    mongo_client = MongoClient(os.environ.get('MONGODB_URI'), serverSelectionTimeoutMS=5000)
-    db = mongo_client.get_database('trinityai_dev')
-    return db.interactions
+mongo_client = MongoClient(os.environ.get('MONGODB_URI'), serverSelectionTimeoutMS=5000)
+db = mongo_client.get_database('trinityai_dev')
+db_interactions = db.interactions
+    
 
 def getResponse(type, question):
     if type == "openai":
@@ -93,7 +93,7 @@ def claudeFirstResponse():
 @app.route('/openaiModifyingResponse', methods=['POST'])
 def openaiModifyingResponse():
     question = request.get_json()['question']
-    if len(list(get_interactions_collection().find({"tool": 1}))) > 5 and len(list(get_interactions_collection().find({"tool": 2}))) > 5 and len(list(get_interactions_collection().find({"tool": 3}))) > 5:
+    if len(list(db_interactions.find({"tool": 1}))) > 5 and len(list(db_interactions.find({"tool": 2}))) > 5 and len(list(db_interactions.find({"tool": 3}))) > 5:
         myWeights = getWeights(question)
     response = getResponse("openai", question)
     return jsonify({"message": response})
@@ -160,9 +160,9 @@ def postDatapoint():
     }
     try:
 
-        get_interactions_collection().insert_one(datapoint)
+        db_interactions.insert_one(datapoint)
 
-        datapoints = list(get_interactions_collection().find())
+        datapoints = list(db_interactions.find())
         for each in datapoints:
             print(each)
 
@@ -172,7 +172,7 @@ def postDatapoint():
         return jsonify({"message": "Unable to process the request at this time."})
 
 def getWeights(question):
-    datapoints = list(get_interactions_collection().find())
+    datapoints = list(db_interactions.find())
     for each in datapoints:
         each['_id'] = str(each['_id'])  # Convert ObjectId to string
         print(each)
@@ -187,4 +187,8 @@ def getWeights(question):
     myWeights = weights.computeWeights(datapoints, question)
     
     print(f"Successfully weighted with weights openai: {myWeights[0]}, gemini: {myWeights[1]}, and claude: {myWeights[2]}")
-    return 
+    return
+
+if __name__ == "__main__":
+    print("hi")
+    app.run(host="0.0.0.0", port=8000)
