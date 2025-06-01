@@ -13,4 +13,4 @@ RUN python -c "from sentence_transformers import SentenceTransformer; model = Se
 RUN which gunicorn || echo "Gunicorn not found"
 COPY . .
 EXPOSE 8000
-CMD ["gunicorn", "--bind", "0.0.0.0:8000", "--workers", "1", "--timeout", "300", "--log-level", "debug", "app:app"]
+CMD ["gunicorn", "--bind", "0.0.0.0:8000", "app:app"]
