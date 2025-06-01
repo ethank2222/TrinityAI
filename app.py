@@ -15,17 +15,10 @@ def home():
 load_dotenv()
 
 myWeights = []
-mongo_client = MongoClient(os.environ.get('MONGODB_URI'))
-try:
-    mongo_client.server_info()  # This will raise an error if the connection fails
-    print("Connected to MongoDB")
-except Exception as e:
-    print(f"MongoDB connection error: {e}")
-
-db_name = 'trinityai_dev'
-db = mongo_client.get_database(db_name)
-interactions_collection = db.interactions
-interactions_collection.delete_many({})
+def get_interactions_collection():
+    mongo_client = MongoClient(os.environ.get('MONGODB_URI'), serverSelectionTimeoutMS=5000)
+    db = mongo_client.get_database('trinityai_dev')
+    return db.interactions
 
 def getResponse(type, question):
     if type == "openai":
@@ -100,7 +93,7 @@ def claudeFirstResponse():
 @app.route('/openaiModifyingResponse', methods=['POST'])
 def openaiModifyingResponse():
     question = request.get_json()['question']
-    if len(list(interactions_collection.find({"tool": 1}))) > 5 and len(list(interactions_collection.find({"tool": 2}))) > 5 and len(list(interactions_collection.find({"tool": 3}))) > 5:
+    if len(list(get_interactions_collection().find({"tool": 1}))) > 5 and len(list(get_interactions_collection().find({"tool": 2}))) > 5 and len(list(get_interactions_collection().find({"tool": 3}))) > 5:
         myWeights = getWeights(question)
     response = getResponse("openai", question)
     return jsonify({"message": response})
@@ -165,22 +158,21 @@ def postDatapoint():
         "tool": tool,
         "score": score,
     }
-    
-    result = interactions_collection.insert_one(datapoint)
-
-    datapoints = list(interactions_collection.find())
-    for each in datapoints:
-        print(each)
-
-    return jsonify({"message": "Thank you for your input!"})
     try:
-        print("hi")
+
+        get_interactions_collection().insert_one(datapoint)
+
+        datapoints = list(get_interactions_collection().find())
+        for each in datapoints:
+            print(each)
+
+        return jsonify({"message": "Thank you for your input!"})
     except Exception as e:
         # Handle any errors and return an error response
         return jsonify({"message": "Unable to process the request at this time."})
 
 def getWeights(question):
-    datapoints = list(interactions_collection.find())
+    datapoints = list(get_interactions_collection().find())
     for each in datapoints:
         each['_id'] = str(each['_id'])  # Convert ObjectId to string
         print(each)
@@ -195,4 +187,7 @@ def getWeights(question):
     myWeights = weights.computeWeights(datapoints, question)
     
     print(f"Successfully weighted with weights openai: {myWeights[0]}, gemini: {myWeights[1]}, and claude: {myWeights[2]}")
-    return myWeights
+    return 
+
+if __name__ == '__main__':
+    app.run(debug=False)

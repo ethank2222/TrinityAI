@@ -1,11 +1,16 @@
 import torch
-from sentence_transformers import SentenceTransformer
 import pandas as pd
 import numpy as np
+from sentence_transformers import SentenceTransformer
 
-model = SentenceTransformer('all-MiniLM-L6-v2')
+model = None
 
 def computeWeights(df, question):
+    global model
+    if model is None:
+        print("Loading SentenceTransformer model...")
+        model = SentenceTransformer('all-MiniLM-L6-v2')
+        print("Model loaded successfully.")
     if isinstance(df, list):
         try:
             df = pd.DataFrame(df)
