@@ -188,7 +188,3 @@ def getWeights(question):
     
     print(f"Successfully weighted with weights openai: {myWeights[0]}, gemini: {myWeights[1]}, and claude: {myWeights[2]}")
     return
-
-if __name__ == "__main__":
-    print("hi")
-    app.run(host="0.0.0.0", port=8000)
