@@ -1,0 +1,453 @@
+let computing = 0;
+giveInfo();
+document.getElementById("menu").onclick = function(){giveInfo()};
+function giveInfo(){
+    var cover = document.createElement("div");
+    cover.id = "cover";
+    cover.style.width = "100%";
+    cover.style.height = "100%";
+    cover.style.backgroundColor = "rgba(0,0,0,.6)";
+    cover.style.zIndex = "100000000";
+    cover.style.position = "fixed";
+    cover.style.top = "0";
+    cover.style.left = "0";
+    document.body.appendChild(cover);
+    var container = document.createElement("div");
+    container.id = "container";
+    container.style.width = "100%";
+    container.style.height = "100vh";
+    container.style.zIndex = "1000000000";
+    container.style.backgroundColor = "rgba(0,0,0,0)";
+    container.style.position = "fixed";
+    container.style.top = "50%";
+    container.style.left = "50%";
+    container.style.transform = "translate(-50%,-50%)";
+    container.style.padding = "30px";
+    document.body.appendChild(container);
+    container.innerHTML = `
+    <div style="max-height: 80vh; background-color: white;position: fixed;top: 50%;left: 50%;transform: translate(-50%,-50%);padding: 40px 60px;border-radius: 20px;">
+        <div id="logo" style="width: min-content; margin: auto;">
+            <img src="/static/images/logo.png" style="margin-left: 0px!important"/>
+            <h1>TrinityAI</h1>
+        </div>
+        <center><h3 style="margin: 0px 0px 15px;"><i>Merging the most powerful AI tools on the market into a single chat solution.</i></h3></center>
+        <div style="max-height: 300px;">
+            <p style="margin: 0px;">Use the capabilities of ChatGPT, Google Gemini, and Anthropic AI (Claude) in a single tool. When the user asks Trinity a question, that question is asked of each of the three LLMs. The responses are then peer reviewed, and each of the three AI tools create new responses based on the most accurate information given by all of the original responses. Finally, Trinity finds the most accurate of these final-draft, compiled responses, and serves it to the user.</p>
+        </div>
+        <div id="close-popup" style="transition: .2s; height: 33px; width: 33px; position: absolute; color: black; top: 15px; right: 25px; cursor:pointer; font-size: 2rem; text-align: center;">✖</div>
+    </div>
+    `;
+    document.getElementById("close-popup").onclick = function(){
+        document.getElementById("cover").remove();
+        document.getElementById("container").remove();
+    };
+    document.addEventListener('keydown', function(event) {
+        if (event.key === 'Escape') {
+            document.getElementById("cover").remove();
+            document.getElementById("container").remove();
+        }
+    });
+}
+
+
+let chain = [];
+nummessages = 0
+document.getElementById("button").onclick = function(){send()};
+document.addEventListener('keydown', function(event) {
+if (event.key === 'Enter' && document.activeElement === document.getElementById("text")){
+    event.preventDefault();
+    send();
+}
+});
+
+async function send(){
+    if (computing == 0 && document.getElementById("text").value != ""){
+        if (document.getElementById("welcome")!= undefined){
+            document.getElementById("welcome").remove();
+        }
+        computing = 1;
+        var question = document.getElementById("text").value;
+        chain.push(question);
+        nummessages++;
+        printMessage("user", question, 4);
+        document.getElementById("text").value = "";
+        let openai_response, gemini_response, claude_response, response2, response3, vote1, vote2, vote3;
+        var done = 0;
+
+        //Get first Responses
+        openai_response = await new Promise((resolve, reject) => {
+            $.ajax({
+                url: '/openaiFirstResponse',
+                contentType: 'application/json',
+                type: 'POST',
+                data: JSON.stringify({
+                    "question": question
+                }),
+                success: function(data) {
+                    done = 1;
+                    updateLoading(done);
+                    resolve(data.message);
+                },
+                error: function(err) {
+                    reject(err);
+                }
+            });
+        });
+        gemini_response = await new Promise((resolve, reject) => {
+            $.ajax({
+                url: '/geminiFirstResponse',
+                contentType: 'application/json',
+                type: 'POST',
+                data: JSON.stringify({
+                    "question": question
+                }),
+                success: function(data) {
+                    done = 2;
+                    updateLoading(done);
+                    resolve(data.message);
+                },
+                error: function(err) {
+                    reject(err);
+                }
+            });
+        });
+        claude_response = await new Promise((resolve, reject) => {
+            $.ajax({
+                url: '/claudeFirstResponse',
+                contentType: 'application/json',
+                type: 'POST',
+                data: JSON.stringify({
+                    "question": question
+                }),
+                success: function(data) {
+                    done = 3;
+                    updateLoading(done);
+                    resolve(data.message);
+                },
+                error: function(err) {
+                    reject(err);
+                }
+            });
+        });
+        //Modify Responses
+        response1 = await new Promise((resolve, reject) => {
+            $.ajax({
+                url: '/openaiModifyingResponse',
+                contentType: 'application/json',
+                type: 'POST',
+                data: JSON.stringify({
+                    "question": "Here was the question that was given: " + question + "Given the following three responses, use the best and most accurate information from each to write a new consolidated response to the queston: " + "1. " + openai_response + " 2. " + gemini_response + " 3. " + claude_response + ". Do not give any qualifiers like 'here's a consolidated response based on the given information."
+                }),
+                success: function(data) {
+                    done = 4;
+                    updateLoading(done);
+                    resolve(data.message);
+                },
+                error: function(err) {
+                    reject(err);
+                }
+            });
+        });
+        response2 = await new Promise((resolve, reject) => {
+            $.ajax({
+                url: '/geminiModifyingResponse',
+                contentType: 'application/json',
+                type: 'POST',
+                data: JSON.stringify({
+                    "question": "Here was the question that was given: " + question + "Given the following three responses, use the best and most accurate information from each to write a new consolidated response to the queston: " + "1. " + openai_response + " 2. " + gemini_response + " 3. " + claude_response + ". Do not give any qualifiers like 'here's a consolidated response based on the given information."
+                }),
+                success: function(data) {
+                    done = 5;
+                    updateLoading(done);
+                    resolve(data.message);
+                },
+                error: function(err) {
+                    reject(err);
+                }
+            });
+        });
+        response3 = await new Promise((resolve, reject) => {
+            $.ajax({
+                url: '/claudeModifyingResponse',
+                contentType: 'application/json',
+                type: 'POST',
+                data: JSON.stringify({
+                    "question": "Here was the question that was given: " + question + "Given the following three responses, use the best and most accurate information from each to write a new consolidated response to the queston: " + "1. " + openai_response + " 2. " + gemini_response + " 3. " + claude_response + ". Do not give any qualifiers like 'here's a consolidated response based on the given information."
+                }),
+                success: function(data) {
+                    done = 6;
+                    updateLoading(done);
+                    resolve(data.message);
+                },
+                error: function(err) {
+                    reject(err);
+                }
+            });
+        });
+        //Voting
+        vote1 = await new Promise((resolve, reject) => {
+            $.ajax({
+                url: '/openaiVoting',
+                contentType: 'application/json',
+                type: 'POST',
+                data: JSON.stringify({
+                    "question": "Here was the question that was given: " + question + "Given the following three responses, return only the number of the best response." + "1. " + response1 + " 2. " + response2 + " 3. " + response3 + " Remember, only return the number '1', '2', or '3' as a standalone number."
+                }),
+                success: function(data) {
+                    done = 7;
+                    updateLoading(done);
+                    resolve(data.message);
+                },
+                error: function(err) {
+                    reject(err);
+                }
+            });
+        });
+        vote2 = await new Promise((resolve, reject) => {
+            $.ajax({
+                url: '/geminiVoting',
+                contentType: 'application/json',
+                type: 'POST',
+                data: JSON.stringify({
+                    "question": "Here was the question that was given: " + question + "Given the following three responses, return only the number of the best response." + "1. " + response1 + " 2. " + response2 + " 3. " + response3 + " Remember, only return the number '1', '2', or '3' as a standalone number."
+                }),
+                success: function(data) {
+                    done = 8;
+                    updateLoading(done);
+                    resolve(data.message);
+                },
+                error: function(err) {
+                    reject(err);
+                }
+            });
+        });
+        vote3 = await new Promise((resolve, reject) => {
+            $.ajax({
+                url: '/claudeVoting',
+                contentType: 'application/json',
+                type: 'POST',
+                data: JSON.stringify({
+                    "question": "Here was the question that was given: " + question + "Given the following three responses, return only the number of the best response." + "1. " + response1 + " 2. " + response2 + " 3. " + response3 + " Remember, only return the number '1', '2', or '3' as a standalone number."
+                }),
+                success: function(data) {
+                    done = 9;
+                    updateLoading(done);
+                    resolve(data.message);
+                },
+                error: function(err) {
+                    reject(err);
+                }
+            });
+        });
+        //Computing and return message
+        var votesfor1 = 0;
+        var votesfor2 = 0;
+        var votesfor3 = 0;
+
+        if (vote1 == 1){
+            votesfor1 += 1
+        }
+        else if (vote1 == 2){
+            votesfor2 += 1
+        }
+        else if (vote1 == 3){
+            votesfor3 += 1
+        }
+        if (vote2 == 1){
+            votesfor1 += 1
+        }
+        else if (vote2 == 2){
+            votesfor2 += 1
+        }
+        else if (vote2 == 3){
+            votesfor3 += 1
+        }
+        if (vote3 == 1){
+            votesfor1 += 1
+        }
+        else if (vote3 == 2){
+            votesfor2 += 1
+        }
+        else if (vote3 == 3){
+            votesfor3 += 1
+        }
+        var best_response = response3;
+        let toolIndex = 3;
+
+        if (votesfor1 > votesfor2 && votesfor1 > votesfor3){
+            best_response = response1;
+            toolIndex = 1;
+        }
+        if (votesfor2 > votesfor1 && votesfor2 > votesfor3){
+            best_response = response2;
+            toolIndex = 2;
+        }
+        tempGlobal = best_response;
+        console.log(tempGlobal);
+
+        done = 10;
+        updateLoading(done);
+
+        nummessages++;
+        chain.push(best_response);
+        printMessage("computer", best_response, toolIndex);
+        
+        computing = 0;
+    }
+};
+function updateLoading(completedTasks){
+    var taskDescriptions = [
+        "Getting Initial Response from <b style='color:#69c8ff;'>ChatGPT</b>",
+        "Getting Initial Response from <b style='color:#db4d4c;'>Gemini</b>",
+        "Getting Initial Response from <b style='color:#eea638;'>Claude</b>",
+        "Peer editing the response from <b style='color:#69c8ff;'>ChatGPT</b>",
+        "Peer editing the response from <b style='color:#db4d4c;'>Gemini</b>",
+        "Peer editing the response from <b style='color:#eea638;'>Claude</b>",
+        "Collecting Vote from <b style='color:#69c8ff;'>ChatGPT</b>",
+        "Collecting Vote from <b style='color:#db4d4c;'>Gemini</b>",
+        "Collecting Vote from <b style='color:#eea638;'>Claude</b>",
+        "Tallying Votes"
+    ]
+    console.log(completedTasks);
+    if (completedTasks == 10){
+        var x = document.getElementsByClassName("loader");
+        for (var i = 0; i < x.length; i++){
+            x[i].remove();
+        }
+    }
+    else{
+        var x = document.getElementsByClassName("loader");
+        for (var i = 0; i < x.length; i++){
+            x[i].children[1].value = completedTasks;
+            x[i].children[2].innerHTML = taskDescriptions[completedTasks];
+        }
+    }
+
+}
+function printMessage(type, text, tool){
+    var elemwrap = document.createElement("div");
+    elemwrap.style.width = "100%";
+    elemwrap.style.display = "flex";
+    elemwrap.style.marginTop = "20px";
+    var elem = document.createElement("div");
+    elem.className = "message";
+    elem.style.wordBreak = "auto-phrase";
+    elem.style.whiteSpace = "normal";
+    elem.style.margin = "0px 20px";
+    elem.style.borderRadius = "15px";
+    elem.style.padding = "10px 18px";
+    elem.style.width = "fit-content";
+    elem.style.maxWidth = "70%";
+    elem.style.textAlign = "left";
+    if (type=="user"){
+        var loader = document.createElement("div");
+        loader.style.position = "fixed";
+        loader.style.top = "50%";
+        loader.className = "loader";
+        loader.style.left = "50%";
+        loader.style.transform = "translate(-50%, -50%)";
+        loader.style.padding = "25px 50px";
+        loader.style.backgroundColor = "rgba(230, 230, 230, 0.9)";
+        loader.style.borderRadius = "5px";
+        loader.style.textAlign="center";
+        loader.innerHTML = `
+            <h2 style="margin: 0px 0px 5px">Loading Response</h2>
+            <progress id="progress-bar" style="transition: .1s; height: 25px; width: 400px; color: #69c8ff" max="10" value="00"></progress>
+            <p id="progress-text">Getting Initial Response from ChatGPT</p>
+        `
+        document.body.appendChild(loader);
+        elem.style.alignSelf = "right";
+        elemwrap.style.justifyContent = "right";
+        elem.innerText = text;
+        updateLoading(0);
+    }
+    else{
+        toolNames = ["ChatGPT (Open AI)", "Gemini (Google AI)", "Claude (Anthropic AI)"]
+        toolLinks = ["https://openai.com/chatgpt/", "https://gemini.google.com/", "https://claude.ai/"]
+        elemwrap.innerHTML = `<img src="/static/images/logo.png" style="
+            height: 26px;
+            background-color: #555;
+            border-radius: 50%;
+            padding: 5px;
+            ">` + elemwrap.innerHTML;
+        elem.style.display = "grid";
+        elem.innerHTML = `
+            <a target="_blank" href="` + toolLinks[tool-1] + `" style="
+                margin: 0px 0px 10px 0px;
+                font-size: 12px;
+                color: inherit;
+                text-decoration: underline;
+                font-style: italic;
+            ">Largest Contributor: ` + toolNames[tool-1] + `</a>
+        ` + text + `
+        <div>
+            <label for="cars">Submit Feedback:</label>
+            <select name="options">
+                <option value="10">10</option>
+                <option value="9">9</option>
+                <option value="8">8</option>
+                <option value="7">7</option>
+                <option value="6">6</option>
+                <option value="5">5</option>
+                <option value="4">4</option>
+                <option value="3">3</option>
+                <option value="2">2</option>
+                <option value="1">1</option>
+            </select>
+            <button style="cursor:pointer;" onclick=submitFeedback(this)>Submit</button>
+        </div>
+
+        `;
+        elem.style.alignSelf = "left";
+        elem.classList += "trinityResponse"
+    }
+    if (tool == 1){
+        elem.style.backgroundColor = "#69c8ff";
+    }
+    else if (tool == 2){
+        elem.style.backgroundColor = "#db4d4c";
+        elem.style.color = "white";
+    }
+    else if (tool == 3){
+        elem.style.backgroundColor = "#eea638";
+        elem.style.color = "white";
+    }
+    else{
+        elem.style.backgroundColor = "#dcdcdc";
+    }
+    document.getElementById("messages").appendChild(elemwrap);
+    elemwrap.appendChild(elem);
+    var objDiv = document.getElementById("messages");
+    objDiv.scrollTop = objDiv.scrollHeight;
+}
+async function submitFeedback(button){
+    var question = button.parentNode.parentNode.parentNode.previousElementSibling.children[0].innerText
+    var score = button.parentNode.children[1].value
+    var tool = "openai"
+    if(button.parentNode.parentNode.children[0].innerText.includes("gemini")){
+        tool = "gemini"
+    }
+    if(button.parentNode.parentNode.children[0].innerText.includes("claude")){
+        tool = "claude"
+    }
+    var resp = await new Promise((resolve, reject) => {
+            $.ajax({
+                url: '/postDatapoint',
+                contentType: 'application/json',
+                type: 'POST',
+                data: JSON.stringify({
+                    "question": question,
+                    "tool": tool,
+                    "score": score
+                }),
+                success: function(data) {
+                    resolve(data.message);
+                },
+                error: function(err) {
+                    reject(err);
+                }
+            });
+        });
+    button.parentNode.innerHTML = resp;
+    
+}
