@@ -1,38 +1,336 @@
 <html>
-    <head>
-        <title>TrinityAI</title>
-        <link rel="shortcut icon" type="image/x-icon" href="{{ url_for('static', filename='favicon.ico') }}">
-        <script src="https://kit.fontawesome.com/28f19a82fa.js" crossorigin="anonymous"></script>
-        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
-        <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-    </head>
-    <!-- Google tag (gtag.js) -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-PMXW5E3GQ7"></script>
-    <script>
-        window.dataLayer = window.dataLayer || [];
-        function gtag(){dataLayer.push(arguments);}
-        gtag('js', new Date());
-
-        gtag('config', 'G-PMXW5E3GQ7');
-    </script>
-    <body>
-        <div id="logo">
-            <img src="/static/images/logo.png"/>
-            <h1>TrinityAI</h1>
-            <i class="fa fa-ellipsis-v" id="menu" style="font-size: 38px; height: 38px; position: relative; margin: auto 0px; right: 0px; justify-self: flex-end; cursor:pointer;"></i>
+  <head>
+    <title>TrinityAI</title>
+    <link
+      rel="shortcut icon"
+      type="image/x-icon"
+      href="{{ url_for('static', filename='favicon.ico') }}"
+    />
+    <script
+      src="https://kit.fontawesome.com/28f19a82fa.js"
+      crossorigin="anonymous"
+    ></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='style.css') }}"
+    />
+  </head>
+  <!-- Google tag (gtag.js) -->
+  <script
+    async
+    src="https://www.googletagmanager.com/gtag/js?id=G-PMXW5E3GQ7"
+  ></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag() {
+      dataLayer.push(arguments);
+    }
+    gtag("js", new Date());
+    gtag("config", "G-PMXW5E3GQ7");
+  </script>
+  <body>
+    <nav id="navbar">
+      <div id="navbar-logo">
+        <img src="/static/images/logo.png" />
+        <h1>TrinityAI</h1>
+      </div>
+      <div id="navbar-tabs">
+        <div class="nav-tab home active" data-tab="home">Homepage</div>
+        <div class="nav-tab peer" data-tab="peer">Peer Review</div>
+        <div class="nav-tab socratic" data-tab="socratic">Socratic Analysis</div>
+      </div>
+      <div id="navbar-hamburger" tabindex="0" aria-label="Open menu">
+        <span></span>
+        <span></span>
+        <span></span>
+      </div>
+      <div id="navbar-dropdown">
+        <div class="nav-tab home" data-tab="home">Homepage</div>
+        <div class="nav-tab peer" data-tab="peer">Peer Review</div>
+        <div class="nav-tab socratic" data-tab="socratic">Socratic Analysis</div>
+      </div>
+    </nav>
+    <div class="wrapper">
+      <div id="home-page" class="homepage-content" style="display: block;">
+        <style>
+          .homepage-hero {
+            min-height: 48vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(120deg, #e6f0ff 0%, #f8faff 100%);
+            position: relative;
+            overflow: hidden;
+            border-radius: 0 0 32px 32px;
+            box-shadow: 0 8px 32px rgba(80,120,255,0.08);
+          }
+          .homepage-hero-logo {
+            width: 90px;
+            height: 90px;
+            margin-bottom: 18px;
+            filter: drop-shadow(0 2px 12px #b3e0ff);
+          }
+          .homepage-hero-title {
+            font-size: 2.8rem;
+            font-weight: 800;
+            letter-spacing: -1px;
+            color: #1a2340;
+            margin-bottom: 10px;
+            text-shadow: 0 2px 12px #e6f7ff;
+          }
+          .homepage-hero-tagline {
+            font-size: 1.35rem;
+            color: #3a4a6b;
+            font-weight: 500;
+            margin-bottom: 32px;
+            text-align: center;
+            max-width: 600px;
+          }
+          .homepage-hero-cta {
+            display: flex;
+            gap: 18px;
+            margin-bottom: 18px;
+          }
+          .homepage-hero-cta button {
+            background: linear-gradient(90deg, #69c8ff 0%, #b3e0ff 100%);
+            color: #1a2340;
+            font-weight: 700;
+            font-size: 1.1rem;
+            border: none;
+            border-radius: 24px;
+            padding: 14px 32px;
+            box-shadow: 0 2px 12px #e6f7ff;
+            cursor: pointer;
+            transition: background 0.2s, transform 0.2s;
+          }
+          .homepage-hero-cta button:hover {
+            background: linear-gradient(90deg, #b3e0ff 0%, #69c8ff 100%);
+            transform: translateY(-2px) scale(1.04);
+          }
+          .homepage-glass {
+            background: rgba(255,255,255,0.7);
+            box-shadow: 0 4px 32px rgba(80,120,255,0.07);
+            border-radius: 24px;
+            backdrop-filter: blur(8px);
+            padding: 32px 24px;
+            margin: 32px auto 0 auto;
+            max-width: 900px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 32px;
+            justify-content: space-between;
+          }
+          .homepage-feature {
+            flex: 1 1 260px;
+            min-width: 240px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            padding: 18px 10px;
+          }
+          .homepage-feature-icon {
+            width: 48px;
+            height: 48px;
+            margin-bottom: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(120deg, #e6f7ff 60%, #b3e0ff 100%);
+            border-radius: 16px;
+            box-shadow: 0 2px 8px #e6f7ff;
+          }
+          .homepage-feature-title {
+            font-size: 1.18rem;
+            font-weight: 700;
+            color: #1a2340;
+            margin-bottom: 8px;
+          }
+          .homepage-feature-desc {
+            color: #3a4a6b;
+            font-size: 1.01rem;
+            font-weight: 400;
+          }
+          .homepage-how {
+            margin: 64px auto 0 auto;
+            max-width: 900px;
+            padding: 0 10px;
+          }
+          .homepage-how-title {
+            font-size: 2rem;
+            font-weight: 800;
+            color: #1a2340;
+            margin-bottom: 24px;
+            text-align: center;
+          }
+          .homepage-how-steps {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 32px;
+            margin-bottom: 24px;
+          }
+          .homepage-how-step {
+            background: rgba(255,255,255,0.8);
+            border-radius: 18px;
+            box-shadow: 0 2px 12px #e6f7ff;
+            padding: 24px 18px;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+          }
+          .homepage-how-step-icon {
+            width: 38px;
+            height: 38px;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(120deg, #e6f7ff 60%, #b3e0ff 100%);
+            border-radius: 12px;
+          }
+          .homepage-how-step-title {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: #1a2340;
+            margin-bottom: 6px;
+          }
+          .homepage-how-step-desc {
+            color: #3a4a6b;
+            font-size: 0.98rem;
+          }
+          @media (max-width: 700px) {
+            .homepage-hero-title { font-size: 2rem; }
+            .homepage-hero-tagline { font-size: 1.05rem; }
+            .homepage-glass { flex-direction: column; gap: 18px; padding: 18px 6px; }
+            .homepage-how-title { font-size: 1.3rem; }
+            .homepage-how-steps { grid-template-columns: 1fr; gap: 18px; }
+          }
+        </style>
+        <section class="homepage-hero">
+          <img src="/static/images/logo.png" class="homepage-hero-logo" alt="TrinityAI Logo" />
+          <div class="homepage-hero-title">TrinityAI: Where AI Debates, You Decide.</div>
+          <div class="homepage-hero-tagline">
+            Experience the future of AI: Peer-reviewed answers, live Socratic debates, and transparent reasoning from the world’s top language models.<br>
+            <span style="color:#69c8ff;font-weight:600;">OpenAI</span> &bull; <span style="color:#db4d4c;font-weight:600;">Grok (xAI)</span> &bull; <span style="color:#ffb366;font-weight:600;">Anthropic</span>
+          </div>
+          <div class="homepage-hero-cta">
+            <button onclick="document.querySelector('[data-tab=peer]').click()">Try Peer Review</button>
+            <button onclick="document.querySelector('[data-tab=socratic]').click()">Try Socratic Analysis</button>
+          </div>
+        </section>
+        <div class="homepage-glass">
+          <div class="homepage-feature">
+            <div class="homepage-feature-icon"> <!-- Peer Review Icon -->
+              <svg width="32" height="32" fill="none" viewBox="0 0 32 32"><circle cx="16" cy="16" r="16" fill="#e6f7ff"/><path d="M10 22l6-6 6 6" stroke="#69c8ff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M16 16V10" stroke="#69c8ff" stroke-width="2" stroke-linecap="round"/></svg>
+            </div>
+            <div class="homepage-feature-title">Peer-Reviewed Chat</div>
+            <div class="homepage-feature-desc">Three LLMs answer, review, and vote on the best response. Get the most accurate, peer-reviewed answer—every time.</div>
+          </div>
+          <div class="homepage-feature">
+            <div class="homepage-feature-icon"> <!-- Socratic Icon -->
+              <svg width="32" height="32" fill="none" viewBox="0 0 32 32"><circle cx="16" cy="16" r="16" fill="#f3e6ff"/><path d="M10 22l6-6 6 6" stroke="#b36aff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><circle cx="16" cy="13" r="3" stroke="#b36aff" stroke-width="2"/></svg>
+            </div>
+            <div class="homepage-feature-title">Live Socratic Debate</div>
+            <div class="homepage-feature-desc">Watch the world’s top AIs debate your question in real time. See every argument, every turn, and every consensus—or honest disagreement.</div>
+          </div>
+          <div class="homepage-feature">
+            <div class="homepage-feature-icon"> <!-- Feedback Icon -->
+              <svg width="32" height="32" fill="none" viewBox="0 0 32 32"><circle cx="16" cy="16" r="16" fill="#fffbe6"/><path d="M10 22l6-6 6 6" stroke="#ffb366" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M16 16V10" stroke="#ffb366" stroke-width="2" stroke-linecap="round"/></svg>
+            </div>
+            <div class="homepage-feature-title">Feedback-Driven</div>
+            <div class="homepage-feature-desc">Rate every LLM’s answer. Your feedback helps TrinityAI learn, adapt, and deliver even better answers over time.</div>
+          </div>
+          <div class="homepage-feature">
+            <div class="homepage-feature-icon"> <!-- Transparency Icon -->
+              <svg width="32" height="32" fill="none" viewBox="0 0 32 32"><circle cx="16" cy="16" r="16" fill="#e6f7e6"/><path d="M10 22l6-6 6 6" stroke="#69c8ff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><rect x="13" y="13" width="6" height="6" rx="1" stroke="#3a4a6b" stroke-width="2"/></svg>
+            </div>
+            <div class="homepage-feature-title">Transparent & Robust</div>
+            <div class="homepage-feature-desc">See every step: from initial answers, to peer review, to voting, to final answer. Errors are handled gracefully and shown clearly.</div>
+          </div>
         </div>
-        <div class="wrapper">
-            <div id="welcome" style="width: 100%; position:fixed; left: 50%; right: 50%; transform: translate(-50%,-50%);">
-                <h2 style="font-size: 34px; margin: 0px;">Hi! I'm Trinity</h2>
-                <h3 style="color:#666; margin: 10px 0px 0px 0px; font-size: 25px;">How can I help you today?</h3>
+        <div class="homepage-how">
+          <div class="homepage-how-title">How It Works</div>
+          <div class="homepage-how-steps">
+            <div class="homepage-how-step">
+              <div class="homepage-how-step-icon">
+                <svg width="28" height="28" fill="none" viewBox="0 0 28 28"><circle cx="14" cy="14" r="14" fill="#e6f7ff"/><path d="M9 19l5-5 5 5" stroke="#69c8ff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M14 14V9" stroke="#69c8ff" stroke-width="2" stroke-linecap="round"/></svg>
+              </div>
+              <div class="homepage-how-step-title">Ask Anything</div>
+              <div class="homepage-how-step-desc">Type your question in Peer Review or Socratic Analysis. No topic is off limits.</div>
             </div>
-            <div id="messages">
+            <div class="homepage-how-step">
+              <div class="homepage-how-step-icon">
+                <svg width="28" height="28" fill="none" viewBox="0 0 28 28"><circle cx="14" cy="14" r="14" fill="#f3e6ff"/><path d="M9 19l5-5 5 5" stroke="#b36aff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><circle cx="14" cy="12" r="2.5" stroke="#b36aff" stroke-width="2"/></svg>
+              </div>
+              <div class="homepage-how-step-title">Watch the Debate</div>
+              <div class="homepage-how-step-desc">See three AIs answer, review, and debate in real time. Every turn is visible, every argument transparent.</div>
             </div>
-            <div id="textbox">
-                <textarea id="text" placeholder="Ask Trinity Anything..." spellcheck="false"></textarea>
-                <i id="button" class="fa fa-send" style="transition: .2s; align-self: center; cursor: pointer; width: 60px; font-size: 24px;"></i>
+            <div class="homepage-how-step">
+              <div class="homepage-how-step-icon">
+                <svg width="28" height="28" fill="none" viewBox="0 0 28 28"><circle cx="14" cy="14" r="14" fill="#fffbe6"/><path d="M9 19l5-5 5 5" stroke="#ffb366" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M14 14V9" stroke="#ffb366" stroke-width="2" stroke-linecap="round"/></svg>
+              </div>
+              <div class="homepage-how-step-title">Get the Best Answer</div>
+              <div class="homepage-how-step-desc">The system selects the most accurate, peer-reviewed response. Or, see where the AIs agree—or disagree.</div>
             </div>
+            <div class="homepage-how-step">
+              <div class="homepage-how-step-icon">
+                <svg width="28" height="28" fill="none" viewBox="0 0 28 28"><circle cx="14" cy="14" r="14" fill="#e6f7e6"/><path d="M9 19l5-5 5 5" stroke="#69c8ff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><rect x="12" y="12" width="4" height="4" rx="1" stroke="#3a4a6b" stroke-width="2"/></svg>
+              </div>
+              <div class="homepage-how-step-title">Give Feedback</div>
+              <div class="homepage-how-step-desc">Rate answers to help TrinityAI learn and improve. Your input shapes the future of AI collaboration.</div>
+            </div>
+          </div>
         </div>
-    </body>
-    <script src="{{ url_for('static', filename='script.js') }}"></script>
+      </div>
+      <div id="peer-page" class="tab-page" style="display: block; width: 100%">
+        <div
+          id="welcome"
+          style="
+            width: 100%;
+            position: fixed;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
+          "
+        >
+          <h2 style="font-size: 34px; margin: 0px">Hi! I'm Trinity</h2>
+          <h3 style="color: #666; margin: 10px 0px 0px 0px; font-size: 25px">
+            How can I help you today?
+          </h3>
+        </div>
+        <div id="messages"></div>
+        <div id="textbox" style="width: 100%"/>
+          <textarea
+            id="text"
+            placeholder="Ask Trinity Anything..."
+            spellcheck="false"
+            width="100%"
+          ></textarea>
+          <i
+            id="button"
+            class="fa fa-send"
+            style="
+              transition: 0.2s;
+              align-self: center;
+              cursor: pointer;
+              width: 60px;
+              font-size: 24px;
+            "
+          ></i>
+        </div>
+      </div>
+      <div id="socratic-page" class="tab-page" style="width: 100%; display:none;">
+          <h2>Socratic Analysis</h2>
+          <div id="socratic-textbox" style="width: 100%; background-color: #dcdcdc; border-radius: 20px; position: relative; bottom: 0; display: flex; align-items: center; margin: 0 auto 24px auto; box-sizing: border-box; padding: 8px 12px;">
+              <textarea id="socratic-input" placeholder="Ask a question for Socratic Analysis..." style="outline: none; border: none; resize: none; font-size: 18px; padding: 10px 0px 10px 20px; line-height: normal; min-height: 92px; width: calc(100% - 60px); text-align: left; background-color: #dcdcdc; border-radius: 20px; box-sizing: border-box;"></textarea>
+              <i id="socratic-send" class="fa fa-send"></i>
+          </div>
+          <div id="socratic-results"></div>
+      </div>
+    </div>
+  </body>
+  <script src="{{ url_for('static', filename='script.js') }}"></script>
 </html>
