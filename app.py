@@ -6,6 +6,7 @@ import os
 from pymongo import MongoClient
 from dotenv import load_dotenv
 import weights
+import database
 
 app = Flask(__name__)
 @app.route('/')
@@ -188,3 +189,7 @@ def getWeights(question):
     
     print(f"Successfully weighted with weights openai: {myWeights[0]}, gemini: {myWeights[1]}, and claude: {myWeights[2]}")
     return
+
+
+if __name__ == '__main__':
+    app.run(debug=True)
