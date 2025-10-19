@@ -2,8 +2,53 @@ __pycache__
 *.pyc
 *.pyo
 *.pyd
+.Python
+env
+pip-log.txt
+pip-delete-this-directory.txt
+.tox
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+*.log
 .git
-.gitignore
-.venv
-.venv2
-venv3
+.mypy_cache
+.pytest_cache
+.hypothesis
+
+# Virtual environments
+venv/
+venv3/
+env/
+ENV/
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Local data directory (MongoDB files)
+data/
+
+# Environment files
+.env
+.env.local
+.env.*.local
+
+# Docker files
+Dockerfile
+docker-compose.yml
+.dockerignore
+
+# Documentation
+README.md
+*.md
