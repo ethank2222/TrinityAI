@@ -24,19 +24,41 @@ db_interactions = db.interactions
 def getResponse(type, question):
     if type == "openai":
         #OpenAI
-        client = OpenAI(api_key=os.environ.get('OPENAI_KEY'))
-        open_ai_stream = client.chat.completions.create(
-            model="gpt-4o",
-            messages=[
-                {"role": "user", "content": question}
-            ],
-            stream=True
-        )
-        open_ai_response = ''
-        for chunk in open_ai_stream:
-            if chunk.choices[0].delta.content is not None:
-                open_ai_response += chunk.choices[0].delta.content
-        return open_ai_response
+        api_key = os.environ.get('OPENAI_KEY')
+        if not api_key:
+            return "Error: OpenAI API key not configured"
+        
+        try:
+            client = OpenAI(api_key=api_key)
+            open_ai_stream = client.chat.completions.create(
+                model="gpt-4o",
+                messages=[
+                    {"role": "user", "content": question}
+                ],
+                stream=True
+            )
+            open_ai_response = ''
+            for chunk in open_ai_stream:
+                if chunk.choices[0].delta.content is not None:
+                    open_ai_response += chunk.choices[0].delta.content
+            return open_ai_response
+            
+        except Exception as openai_error:
+            error_message = str(openai_error)
+            if "insufficient_quota" in error_message or "billing" in error_message.lower() or "quota" in error_message.lower():
+                return "Error: OpenAI API quota insufficient. Please check your billing."
+            elif "invalid_api_key" in error_message or "authentication" in error_message.lower():
+                return "Error: Invalid OpenAI API key. Please check your API key."
+            elif "rate_limit" in error_message.lower() or "rate limit" in error_message.lower():
+                return "Error: OpenAI API rate limit exceeded. Please try again later."
+            elif "model" in error_message.lower() and "not found" in error_message.lower():
+                return "Error: OpenAI model not available. Please try a different model."
+            elif "timeout" in error_message.lower():
+                return "Error: OpenAI API request timed out. Please try again."
+            elif "connection" in error_message.lower():
+                return "Error: Unable to connect to OpenAI API. Please check your internet connection."
+            else:
+                return f"OpenAI API error: {error_message}"
     elif type == "gemini":
         #Gemini
         api_key = os.environ.get('GEMINI_KEY')
@@ -64,29 +86,65 @@ def getResponse(type, question):
             return response.text
             
         except Exception as gemini_error:
-            return f"Gemini API error: {str(gemini_error)}"
+            error_message = str(gemini_error)
+            if "api_key" in error_message.lower() or "authentication" in error_message.lower():
+                return "Error: Invalid Gemini API key. Please check your API key."
+            elif "quota" in error_message.lower() or "billing" in error_message.lower():
+                return "Error: Gemini API quota insufficient. Please check your billing."
+            elif "rate_limit" in error_message.lower() or "rate limit" in error_message.lower():
+                return "Error: Gemini API rate limit exceeded. Please try again later."
+            elif "model" in error_message.lower() and "not found" in error_message.lower():
+                return "Error: Gemini model not available. Please try a different model."
+            elif "timeout" in error_message.lower():
+                return "Error: Gemini API request timed out. Please try again."
+            elif "connection" in error_message.lower():
+                return "Error: Unable to connect to Gemini API. Please check your internet connection."
+            else:
+                return f"Gemini API error: {error_message}"
     elif type == "claude":
         #claude
-        client2 = Anthropic(api_key=os.environ.get('CLAUDE_KEY'))
-        claude_stream = client2.messages.create(
-            model="claude-3-5-sonnet-20240620",
-            max_tokens=1000,
-            temperature=0,
-            system="",
-            messages=[
-                {
-                    "role": "user",
-                    "content": [
-                        {
-                            "type": "text",
-                            "text": question
-                        }
-                    ]
-                }
-            ]
-        )
-        claude_response = claude_stream.content[0].text
-        return claude_response
+        api_key = os.environ.get('CLAUDE_KEY')
+        if not api_key:
+            return "Error: Claude API key not configured"
+        
+        try:
+            client2 = Anthropic(api_key=api_key)
+            claude_stream = client2.messages.create(
+                model="claude-3-5-sonnet-20240620",
+                max_tokens=1000,
+                temperature=0,
+                system="",
+                messages=[
+                    {
+                        "role": "user",
+                        "content": [
+                            {
+                                "type": "text",
+                                "text": question
+                            }
+                        ]
+                    }
+                ]
+            )
+            claude_response = claude_stream.content[0].text
+            return claude_response
+            
+        except Exception as claude_error:
+            error_message = str(claude_error)
+            if "credit balance is too low" in error_message or "insufficient credits" in error_message or "billing" in error_message.lower():
+                return "Error: Claude API credits insufficient. Please check your billing."
+            elif "invalid_request_error" in error_message or "authentication" in error_message.lower():
+                return "Error: Invalid Claude API request. Please check your API key and permissions."
+            elif "rate_limit" in error_message.lower() or "rate limit" in error_message.lower():
+                return "Error: Claude API rate limit exceeded. Please try again later."
+            elif "model" in error_message.lower() and "not found" in error_message.lower():
+                return "Error: Claude model not available. Please try a different model."
+            elif "timeout" in error_message.lower():
+                return "Error: Claude API request timed out. Please try again."
+            elif "connection" in error_message.lower():
+                return "Error: Unable to connect to Claude API. Please check your internet connection."
+            else:
+                return f"Claude API error: {error_message}"
     else:
         return "N/A"
 
