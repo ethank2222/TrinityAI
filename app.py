@@ -3,10 +3,15 @@ from openai import OpenAI
 import google.generativeai as genai
 from flask import Flask, render_template, jsonify, request
 import os
+import logging
 from dotenv import load_dotenv
 
 app = Flask(__name__)
 load_dotenv()
+
+# Configure logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 def get_response(ai_type, question):
     """Get response from AI service"""
@@ -21,10 +26,38 @@ def get_response(ai_type, question):
             return ''.join(chunk.choices[0].delta.content for chunk in response if chunk.choices[0].delta.content)
         
         elif ai_type == "gemini":
-            genai.configure(api_key=os.environ.get('GEMINI_KEY'))
-            model = genai.GenerativeModel("gemini-1.5-flash")
-            response = model.generate_content(question)
-            return response.text
+            api_key = os.environ.get('GEMINI_KEY')
+            if not api_key:
+                logger.error("GEMINI_KEY not found in environment variables")
+                return "Error: Gemini API key not configured"
+            
+            try:
+                genai.configure(api_key=api_key)
+                model = genai.GenerativeModel("gemini-2.5-flash")
+                logger.info(f"Generating content with Gemini for question: {question[:50]}...")
+                response = model.generate_content(question)
+                
+                # Check if response is blocked or has issues
+                if not response.text:
+                    if response.candidates and response.candidates[0].finish_reason:
+                        finish_reason = response.candidates[0].finish_reason
+                        logger.warning(f"Gemini response blocked. Finish reason: {finish_reason}")
+                        if finish_reason == genai.types.FinishReason.SAFETY:
+                            return "Response blocked due to safety concerns. Please try a different question."
+                        elif finish_reason == genai.types.FinishReason.RECITATION:
+                            return "Response blocked due to recitation concerns. Please try a different question."
+                        else:
+                            return f"Response blocked. Reason: {finish_reason}"
+                    else:
+                        logger.warning("Gemini returned empty response with no finish reason")
+                        return "No response generated. Please try again."
+                
+                logger.info("Gemini response generated successfully")
+                return response.text
+                
+            except Exception as gemini_error:
+                logger.error(f"Gemini API error: {str(gemini_error)}")
+                return f"Gemini API error: {str(gemini_error)}"
         
         elif ai_type == "claude":
             client = Anthropic(api_key=os.environ.get('CLAUDE_KEY'))
