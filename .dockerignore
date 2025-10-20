@@ -45,9 +45,7 @@ data/
 .env.*.local
 
 # Docker files
-Dockerfile
 docker-compose.yml
-.dockerignore
 
 # Documentation
 README.md
