@@ -19,6 +19,11 @@ def home():
 @app.route('/health')
 def health_check():
     """Health check endpoint for Railway"""
+    return "OK", 200
+
+@app.route('/health/json')
+def health_check_json():
+    """JSON health check endpoint for Railway"""
     try:
         # Simple health check that Railway can rely on
         return jsonify({

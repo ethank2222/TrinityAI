@@ -25,12 +25,6 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Copy application code
 COPY . .
 
-# Make startup script executable
-RUN chmod +x start.sh
-
-# Test that the application can start
-RUN python test_app.py
-
 # Create non-root user
 RUN useradd --create-home --shell /bin/bash app && chown -R app:app /app
 USER app
@@ -38,7 +32,5 @@ USER app
 # Expose port
 EXPOSE 8000
 
-# Health check is handled by Railway configuration
-
-# Start command
-CMD ["./start.sh"]
+# Simple startup command without script
+CMD gunicorn --bind 0.0.0.0:8000 --workers 1 --timeout 300 --worker-class sync --access-logfile - --error-logfile - --log-level info wsgi:application
