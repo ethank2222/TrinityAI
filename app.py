@@ -39,10 +39,32 @@ def getResponse(type, question):
         return open_ai_response
     elif type == "gemini":
         #Gemini
-        genai.configure(api_key=os.environ.get('GEMINI_KEY'))
-        model = genai.GenerativeModel("gemini-1.5-flash")
-        gemini_stream = model.generate_content(question)
-        return gemini_stream.text
+        api_key = os.environ.get('GEMINI_KEY')
+        if not api_key:
+            return "Error: Gemini API key not configured"
+        
+        try:
+            genai.configure(api_key=api_key)
+            model = genai.GenerativeModel("gemini-2.5-flash")
+            response = model.generate_content(question)
+            
+            # Check if response is blocked or has issues
+            if not response.text:
+                if response.candidates and response.candidates[0].finish_reason:
+                    finish_reason = response.candidates[0].finish_reason
+                    if finish_reason == genai.types.FinishReason.SAFETY:
+                        return "Response blocked due to safety concerns. Please try a different question."
+                    elif finish_reason == genai.types.FinishReason.RECITATION:
+                        return "Response blocked due to recitation concerns. Please try a different question."
+                    else:
+                        return f"Response blocked. Reason: {finish_reason}"
+                else:
+                    return "No response generated. Please try again."
+            
+            return response.text
+            
+        except Exception as gemini_error:
+            return f"Gemini API error: {str(gemini_error)}"
     elif type == "claude":
         #claude
         client2 = Anthropic(api_key=os.environ.get('CLAUDE_KEY'))
