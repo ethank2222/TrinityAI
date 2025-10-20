@@ -7,6 +7,8 @@ from pymongo import MongoClient
 from dotenv import load_dotenv
 import weights
 import database
+import pandas as pd
+from datetime import datetime
 
 app = Flask(__name__)
 
@@ -17,7 +19,34 @@ def home():
 @app.route('/health')
 def health_check():
     """Health check endpoint for Railway"""
-    return jsonify({"status": "healthy", "message": "TrinityAI is running"})
+    try:
+        # Simple health check that Railway can rely on
+        return jsonify({
+            "status": "healthy",
+            "message": "TrinityAI is running",
+            "timestamp": datetime.now().isoformat()
+        }), 200
+    except Exception as e:
+        return jsonify({"status": "unhealthy", "error": str(e)}), 500
+
+@app.route('/health/detailed')
+def detailed_health_check():
+    """Detailed health check endpoint for debugging"""
+    try:
+        checks = {
+            "status": "healthy",
+            "message": "TrinityAI is running",
+            "timestamp": datetime.now().isoformat(),
+            "database": "connected" if db_interactions is not None else "disconnected",
+            "api_keys": {
+                "openai": "configured" if os.environ.get('OPENAI_KEY') else "missing",
+                "gemini": "configured" if os.environ.get('GEMINI_KEY') else "missing", 
+                "claude": "configured" if os.environ.get('CLAUDE_KEY') else "missing"
+            }
+        }
+        return jsonify(checks), 200
+    except Exception as e:
+        return jsonify({"status": "unhealthy", "error": str(e)}), 500
 
 load_dotenv()
 
