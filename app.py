@@ -5,8 +5,17 @@ from flask import Flask, render_template, jsonify, request
 import os
 from pymongo import MongoClient
 from dotenv import load_dotenv
-import weights
-import database
+try:
+    import weights
+except ImportError:
+    print("Warning: weights module not found. Using default weights.")
+    weights = None
+
+try:
+    import database
+except ImportError:
+    print("Warning: database module not found.")
+    database = None
 
 app = Flask(__name__)
 @app.route('/')
@@ -151,95 +160,146 @@ def getResponse(type, question):
 #openai first response
 @app.route('/openaiFirstResponse', methods=['POST'])
 def openaiFirstResponse():
-    data = request.get_json()
-    question = "Please respond with the best answer to the following question:" + data['question']
-    response = getResponse("openai", question)
-    return jsonify({"message": response})
+    try:
+        data = request.get_json()
+        question = "Please respond with the best answer to the following question:" + data['question']
+        response = getResponse("openai", question)
+        return jsonify({"message": response})
+    except Exception as e:
+        print(f"Error in openaiFirstResponse: {str(e)}")
+        return jsonify({"message": "Error processing request"})
+
 #gemini first response
 @app.route('/geminiFirstResponse', methods=['POST'])
 def geminiFirstResponse():
-    data = request.get_json()
-    question = "Please respond with the best answer to the following question:" + data['question']
-    response = getResponse("gemini", question)
-    return jsonify({"message": response})
+    try:
+        data = request.get_json()
+        question = "Please respond with the best answer to the following question:" + data['question']
+        response = getResponse("gemini", question)
+        return jsonify({"message": response})
+    except Exception as e:
+        print(f"Error in geminiFirstResponse: {str(e)}")
+        return jsonify({"message": "Error processing request"})
+
 #claude first response
 @app.route('/claudeFirstResponse', methods=['POST'])
 def claudeFirstResponse():
-    data = request.get_json()
-    question = "Please respond with the best answer to the following question:" + data['question']
-    response = getResponse("claude", question)
-    return jsonify({"message": response})
+    try:
+        data = request.get_json()
+        question = "Please respond with the best answer to the following question:" + data['question']
+        response = getResponse("claude", question)
+        return jsonify({"message": response})
+    except Exception as e:
+        print(f"Error in claudeFirstResponse: {str(e)}")
+        return jsonify({"message": "Error processing request"})
 
 #openai modifying response
 @app.route('/openaiModifyingResponse', methods=['POST'])
 def openaiModifyingResponse():
     question = request.get_json()['question']
+    myWeights = [.333, .333, .333]  # Default weights
+    
     if len(list(db_interactions.find({"tool": 1}))) > 5 and len(list(db_interactions.find({"tool": 2}))) > 5 and len(list(db_interactions.find({"tool": 3}))) > 5:
         myWeights = getWeights(question)
+    
     response = getResponse("openai", question)
     return jsonify({"message": response})
 #gemini modifying response
 @app.route('/geminiModifyingResponse', methods=['POST'])
 def geminiModifyingResponse():
-    question = request.get_json()['question']
-    response = getResponse("gemini", question)
-    return jsonify({"message": response})
+    try:
+        question = request.get_json()['question']
+        response = getResponse("gemini", question)
+        return jsonify({"message": response})
+    except Exception as e:
+        print(f"Error in geminiModifyingResponse: {str(e)}")
+        return jsonify({"message": "Error processing request"})
+
 #claude modifying response
 @app.route('/claudeModifyingResponse', methods=['POST'])
 def claudeModifyingResponse():
-    question = request.get_json()['question']
-    response = getResponse("claude", question)
-    return jsonify({"message": response})
+    try:
+        question = request.get_json()['question']
+        response = getResponse("claude", question)
+        return jsonify({"message": response})
+    except Exception as e:
+        print(f"Error in claudeModifyingResponse: {str(e)}")
+        return jsonify({"message": "Error processing request"})
 
 #openai voting
 @app.route('/openaiVoting', methods=['POST'])
 def openaiVoting():
-    question = request.get_json()['question']
-    response = getResponse("openai", question)
-    if "1" in response:
-        return jsonify({"message": 1})
-    if "2" in response:
-        return jsonify({"message": 2})
-    return jsonify({"message": 3})
+    try:
+        data = request.get_json()
+        question = data['question']
+        voting_question = f"Rate the following responses on a scale of 1-3 (1=best, 2=good, 3=worst): {question}. Respond with only the number (1, 2, or 3)."
+        response = getResponse("openai", voting_question)
+        
+        # Extract number from response
+        for char in response:
+            if char.isdigit() and char in ['1', '2', '3']:
+                return jsonify({"message": int(char)})
+        return jsonify({"message": 3})  # Default to 3 if no valid number found
+    except Exception as e:
+        print(f"Error in openaiVoting: {str(e)}")
+        return jsonify({"message": 3})
+
 #gemini voting
 @app.route('/geminiVoting', methods=['POST'])
 def geminiVoting():
-    question = request.get_json()['question']
-    response = getResponse("gemini", question)
-    if "1" in response:
-        return jsonify({"message": 1})
-    if "2" in response:
-        return jsonify({"message": 2})
-    return jsonify({"message": 3})
+    try:
+        data = request.get_json()
+        question = data['question']
+        voting_question = f"Rate the following responses on a scale of 1-3 (1=best, 2=good, 3=worst): {question}. Respond with only the number (1, 2, or 3)."
+        response = getResponse("gemini", voting_question)
+        
+        # Extract number from response
+        for char in response:
+            if char.isdigit() and char in ['1', '2', '3']:
+                return jsonify({"message": int(char)})
+        return jsonify({"message": 3})  # Default to 3 if no valid number found
+    except Exception as e:
+        print(f"Error in geminiVoting: {str(e)}")
+        return jsonify({"message": 3})
+
 #claude voting response
 @app.route('/claudeVoting', methods=['POST'])
 def claudeVoting():
-    question = request.get_json()['question']
-    response = getResponse("claude", question)
-    if "1" in response:
-        return jsonify({"message": 1})
-    if "2" in response:
-        return jsonify({"message": 2})
-    return jsonify({"message": 3})
+    try:
+        data = request.get_json()
+        question = data['question']
+        voting_question = f"Rate the following responses on a scale of 1-3 (1=best, 2=good, 3=worst): {question}. Respond with only the number (1, 2, or 3)."
+        response = getResponse("claude", voting_question)
+        
+        # Extract number from response
+        for char in response:
+            if char.isdigit() and char in ['1', '2', '3']:
+                return jsonify({"message": int(char)})
+        return jsonify({"message": 3})  # Default to 3 if no valid number found
+    except Exception as e:
+        print(f"Error in claudeVoting: {str(e)}")
+        return jsonify({"message": 3})
 
 @app.route('/postDatapoint', methods=['POST'])
 def postDatapoint():
-    question = request.get_json()['question']
-    tool = request.get_json()['tool']
-    score = int(request.get_json()['score'])
-    if tool == "openai":
-        tool = 1
-    elif tool == "gemini":
-        tool = 2
-    else:
-        tool = 3
-
-    datapoint = {
-        "question": question,
-        "tool": tool,
-        "score": score,
-    }
     try:
+        data = request.get_json()
+        question = data['question']
+        tool = data['tool']
+        score = int(data['score'])
+        
+        if tool == "openai":
+            tool = 1
+        elif tool == "gemini":
+            tool = 2
+        else:
+            tool = 3
+
+        datapoint = {
+            "question": question,
+            "tool": tool,
+            "score": score,
+        }
 
         db_interactions.insert_one(datapoint)
 
@@ -249,7 +309,7 @@ def postDatapoint():
 
         return jsonify({"message": "Thank you for your input!"})
     except Exception as e:
-        # Handle any errors and return an error response
+        print(f"Error in postDatapoint: {str(e)}")
         return jsonify({"message": "Unable to process the request at this time."})
 
 def getWeights(question):
@@ -262,13 +322,19 @@ def getWeights(question):
         print("Not enough Data for Weighting Process")
         return [.333, .333, .333]
 
-    
-    #implement ML Algo Here
-
-    myWeights = weights.computeWeights(datapoints, question)
-    
-    print(f"Successfully weighted with weights openai: {myWeights[0]}, gemini: {myWeights[1]}, and claude: {myWeights[2]}")
-    return
+    try:
+        if weights is None:
+            print("Weights module not available, using default weights")
+            return [.333, .333, .333]
+        
+        #implement ML Algo Here
+        myWeights = weights.computeWeights(datapoints, question)
+        
+        print(f"Successfully weighted with weights openai: {myWeights[0]}, gemini: {myWeights[1]}, and claude: {myWeights[2]}")
+        return myWeights
+    except Exception as e:
+        print(f"Error computing weights: {str(e)}")
+        return [.333, .333, .333]
 
 
 if __name__ == '__main__':
